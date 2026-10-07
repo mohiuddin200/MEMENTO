@@ -1,4 +1,24 @@
-# Memento — Death Clock & Real-Time Death Rate
+<div align="center">
+
+<img src="icons/icon128.png" width="88" alt="Memento icon">
+
+# Memento
+
+**Death clock & real-time death rate — a memento mori for every new tab.**
+
+Your personal countdown ticking backward, your life so far ticking up, and the
+live birth/death rate for your country or the whole world.
+
+![Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-b3262e?logo=googlechrome&logoColor=white)
+![Version](https://img.shields.io/badge/version-1.3.0-1a1a1a)
+![Vanilla JS](https://img.shields.io/badge/vanilla-HTML%20%C2%B7%20CSS%20%C2%B7%20JS-f7df1e?logo=javascript&logoColor=black)
+![No build step](https://img.shields.io/badge/build%20step-none-2e7d32)
+![Data: World Bank](https://img.shields.io/badge/data-World%20Bank%20Open%20Data-0b6fb6)
+![Privacy: local only](https://img.shields.io/badge/privacy-stays%20on%20device-555)
+
+<img src="docs/screenshots/hero.png" width="860" alt="Memento new tab: 13,510 days left, a live hh:mm:ss.mmm countdown, today's day bar, days lived, and Bangladesh's births and deaths today">
+
+</div>
 
 A Manifest V3 Chrome extension that replaces your new tab with a cinematic
 **memento mori** page: your personal death countdown ticking backward, your life
@@ -6,6 +26,19 @@ so far ticking up, and the real-time birth/death rate for your country —
 themeable, with your own background image.
 
 **Approximate by design — a warning sign, not a diagnosis.**
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/world-deaths.png" alt="Dusk theme counting deaths today worldwide, with the rising tide ambient"><br><sub><b>Dusk</b> · hero set to <i>deaths today · world</i>, Rising tide ambient</sub></td>
+    <td width="50%"><img src="docs/screenshots/paper.png" alt="Paper light theme with shortcut chips and the hourglass ambient"><br><sub><b>Paper</b> · shortcut chips, Hourglass ambient</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/ember.png" alt="Ember theme counting deaths today in Bangladesh, with drifting embers"><br><sub><b>Ember</b> · hero set to <i>deaths today · your country</i>, Embers ambient</sub></td>
+    <td width="50%"><img src="docs/screenshots/first-run.png" alt="First-run setup asking for birthday, sex and country"><br><sub><b>First run</b> · three answers, nothing leaves the device</sub></td>
+  </tr>
+</table>
 
 ## What you get
 
@@ -76,10 +109,14 @@ stays on your device in `chrome.storage.local`.
 
 ## Install (unpacked)
 
+```sh
+git clone https://github.com/mohiuddin200/MEMENTO.git
+```
+
 1. Open `chrome://extensions`
 2. Toggle **Developer mode** (top-right)
 3. Click **Load unpacked**
-4. Select this `real-death-rate/` folder
+4. Select the cloned `MEMENTO/` folder
 5. Open a new tab
 
 ## Data
@@ -106,7 +143,7 @@ baseline (`js/baseline.js`) takes over and the badge says "offline baseline".
 ## Project layout
 
 ```
-real-death-rate/
+MEMENTO/
 ├── manifest.json        # MV3, chrome_url_overrides.newtab, storage + worldbank host
 ├── newtab.html
 ├── css/newtab.css       # near-black, vignette + film grain, red accent
@@ -116,6 +153,8 @@ real-death-rate/
 ├── js/app.js            # setup modal, tickers, country picker, one-liners
 ├── icons/icon{16,32,48,128}.png
 ├── tests/               # node test suites + render-test screenshots
+├── store/               # Chrome Web Store listing screenshots (1280×800)
+├── docs/screenshots/    # README images
 └── tools/               # one-shot generators for baseline.js and the icons
 ```
 
