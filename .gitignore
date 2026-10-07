@@ -1,0 +1,5 @@
+# Store upload package — regenerate with zip when publishing
+memento-*.zip
+
+# Local agent workspace state
+.zcode/

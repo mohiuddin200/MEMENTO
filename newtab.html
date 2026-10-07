@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>New Tab — Memento</title>
+  <link rel="stylesheet" href="css/newtab.css">
+</head>
+<body data-theme="midnight">
+  <div class="bgimg" id="bgimg" aria-hidden="true"></div>
+  <canvas id="ambient" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+
+  <main class="page" id="page">
+    <p class="brand">MEMENTO&nbsp;MORI</p>
+
+    <nav class="shortcuts" id="shortcuts" aria-label="Shortcuts">
+      <div class="sc-row" id="sc-row"></div>
+      <div class="sc-pop" id="sc-pop" hidden>
+        <label class="sc-lab" for="sc-name">Name</label>
+        <input type="text" id="sc-name" class="field" placeholder="e.g. GitHub"
+               autocomplete="off" spellcheck="false" maxlength="24">
+        <label class="sc-lab" for="sc-url">URL</label>
+        <input type="text" id="sc-url" class="field" placeholder="e.g. github.com"
+               autocomplete="off" spellcheck="false">
+        <p class="sc-err" id="sc-err" role="alert"></p>
+        <div class="sc-pop-btns">
+          <button type="button" class="btn-ghost" id="sc-cancel">Cancel</button>
+          <button type="button" class="save sc-save" id="sc-save">Add</button>
+        </div>
+      </div>
+    </nav>
+
+    <section class="hero" id="hero">
+      <div class="count">
+        <span class="days num" id="days-left">—</span>
+        <span class="days-label" id="days-label">days left</span>
+      </div>
+      <div class="hms num" id="hms">--:--:--</div>
+      <p class="le-note" id="le-note"></p>
+      <div class="daybar" id="daybar" hidden>
+        <div class="daybar-track" title="Share of today already spent">
+          <div class="daybar-fill" id="daybar-fill"></div>
+        </div>
+        <p class="daybar-label" id="daybar-label">today · 0% spent</p>
+      </div>
+      <p class="oneliner" id="oneliner"></p>
+    </section>
+
+    <section class="lived" id="lived" hidden>
+      <p class="lived-line">
+        <span class="num" id="alt-days"></span><span class="dot" id="alt-dot">·</span><span class="num" id="days-lived">0</span> days lived
+        <span class="dot">·</span>
+        <span class="num" id="secs-lived">0</span> seconds
+      </p>
+      <div class="progress" title="Share of your expected life already lived">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </section>
+
+    <section class="rates-block">
+      <div class="rates-scope">
+        <button type="button" class="scope-pill" id="scope-btn" title="Switch these numbers between your country and the world"></button>
+      </div>
+      <section class="rates" id="rates">
+        <div class="rate">
+          <span class="rate-value num red" id="deaths-sec">—</span>
+          <span class="rate-label">deaths / second</span>
+        </div>
+        <div class="rate">
+          <span class="rate-value num" id="births-today">—</span>
+          <span class="rate-label">births today</span>
+        </div>
+        <div class="rate">
+          <span class="rate-value num red" id="deaths-today">—</span>
+          <span class="rate-label">deaths today</span>
+        </div>
+        <div class="rate">
+          <span class="rate-value num" id="net-today">—</span>
+          <span class="rate-label">net change today</span>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <p class="badge" id="data-badge">World Bank · loading…</p>
+  <button class="gear" id="gear" title="Settings" aria-label="Settings">&#9881;</button>
+
+  <div class="backdrop" id="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h1 id="modal-title">Three answers.<br>Then every tab reminds you.</h1>
+      <p class="modal-sub">Nothing leaves this device. Change it anytime with the gear.</p>
+
+      <label class="field-label" for="f-birthday">Birthday</label>
+      <div class="cal-wrap">
+        <button type="button" class="field cal-field placeholder" id="f-birthday">Select your birthday</button>
+        <div class="cal" id="cal" hidden>
+          <div class="cal-head">
+            <button type="button" class="cal-nav wide" id="cal-prevy" title="Previous year">&#171;</button>
+            <button type="button" class="cal-nav" id="cal-prev" title="Previous month">&#8249;</button>
+            <span class="cal-title" id="cal-title"></span>
+            <button type="button" class="cal-nav" id="cal-next" title="Next month">&#8250;</button>
+            <button type="button" class="cal-nav wide" id="cal-nexty" title="Next year">&#187;</button>
+          </div>
+          <div class="cal-grid cal-week">
+            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+          </div>
+          <div class="cal-grid" id="cal-days"></div>
+        </div>
+      </div>
+
+      <span class="field-label">Sex <span class="hint">— sets your life expectancy</span></span>
+      <div class="segmented" id="f-sex">
+        <button type="button" data-sex="male">Male</button>
+        <button type="button" data-sex="female">Female</button>
+      </div>
+
+      <label class="field-label" for="f-country">Country</label>
+      <input type="text" id="f-country" class="field" placeholder="Search countries…" autocomplete="off" spellcheck="false">
+      <ul class="country-list" id="country-list" role="listbox" aria-label="Country"></ul>
+
+      <span class="field-label">Life expectancy <span class="hint" id="le-auto-hint"></span></span>
+      <div class="segmented" id="f-le">
+        <button type="button" data-le="auto">World Bank average</button>
+        <button type="button" data-le="custom">My own estimate</button>
+      </div>
+      <input type="number" id="f-le-years" class="field le-input" min="20" max="120" step="0.5"
+             inputmode="decimal" placeholder="e.g. 80" hidden>
+
+      <span class="field-label">Customize</span>
+
+      <span class="field-label" style="margin-top:10px">Theme</span>
+      <div class="swatches" id="f-theme">
+        <button type="button" data-theme-swatch="midnight" title="Midnight"><span class="swatch-name">Midnight</span></button>
+        <button type="button" data-theme-swatch="dusk" title="Dusk"><span class="swatch-name">Dusk</span></button>
+        <button type="button" data-theme-swatch="ember" title="Ember"><span class="swatch-name">Ember</span></button>
+        <button type="button" data-theme-swatch="paper" title="Paper"><span class="swatch-name">Paper</span></button>
+      </div>
+
+      <span class="field-label">Ambient <span class="hint">— the background mood</span></span>
+      <div class="segmented wrap" id="f-ambient">
+        <button type="button" data-ambient="none" title="Still — no animation">None</button>
+        <button type="button" data-ambient="hourglass" title="Hourglass — the day drains away as falling red sand">Hourglass</button>
+        <button type="button" data-ambient="tide" title="The Rising — a dark tide rises through the day">Rising</button>
+        <button type="button" data-ambient="embers" title="Embers — a slow drift of glowing embers and falling ash">Embers</button>
+        <button type="button" data-ambient="pulse" title="Last pulse — a heartbeat trace that occasionally flatlines">Pulse</button>
+      </div>
+
+      <span class="field-label">Big number <span class="hint">— what the hero counts</span></span>
+      <div class="segmented" id="f-hero">
+        <button type="button" data-hero="days-left">Days left</button>
+        <button type="button" data-hero="deaths-country">Country deaths</button>
+        <button type="button" data-hero="deaths-world">World deaths</button>
+      </div>
+
+      <span class="field-label">Bottom numbers <span class="hint">— country or world</span></span>
+      <div class="segmented" id="f-scope">
+        <button type="button" data-scope="country">My country</button>
+        <button type="button" data-scope="world">World</button>
+      </div>
+
+      <span class="field-label">Day bar <span class="hint">— today draining, live</span></span>
+      <div class="segmented" id="f-daybar">
+        <button type="button" data-daybar="on">Show</button>
+        <button type="button" data-daybar="off">Hide</button>
+      </div>
+
+      <span class="field-label">Background image</span>
+      <div class="bg-row">
+        <button type="button" class="field" id="f-bg-upload">Upload from this device…</button>
+        <button type="button" class="btn-ghost" id="f-bg-remove" hidden>Remove</button>
+      </div>
+      <input type="file" id="f-bg-file" accept="image/*" hidden>
+
+      <button class="save" id="save" disabled>Start counting</button>
+      <p class="fineprint">World Bank life tables · approximate — a warning sign, not a diagnosis.</p>
+    </div>
+  </div>
+
+  <script src="js/stats.js"></script>
+  <script src="js/baseline.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ambient.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
