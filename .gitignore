@@ -3,3 +3,9 @@ memento-*.zip
 
 # Local agent workspace state
 .zcode/
+
+# Vercel link state for the landing page
+site/.vercel
+
+# Design-review captures
+.impeccable/review/

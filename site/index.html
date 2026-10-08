@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Memento — Death Clock &amp; Real-Time Death Rate for Chrome</title>
+  <meta name="description" content="A Chrome new tab that counts down the days you likely have left and shows the world's real-time birth and death rate. Free, private, no account.">
+  <link rel="canonical" href="https://memento-deathclock.vercel.app/">
+  <meta name="theme-color" content="#f4f1ea">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Memento — every new tab, a quiet reminder">
+  <meta property="og:description" content="Your personal death clock and the world's real-time death rate, on every Chrome new tab.">
+  <meta property="og:image" content="https://memento-deathclock.vercel.app/assets/og.jpg">
+  <meta property="og:url" content="https://memento-deathclock.vercel.app/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" href="/fonts/instrument-serif.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<!--
+THESIS: The page proves the product by doing it: a live count of people who died since you arrived, then the real new tab. Refuses the feature-card grid and the stock hero.
+OWN-WORLD: The extension's Paper theme. Ivory ground, ink type, one red accent; Instrument Serif display, Gelasio numerals (Georgia's metrics, as in the app), Inter text; hairline rules, browser-window frames around real screenshots.
+STORY: Visitor sees the clock running, understands what the new tab shows, trusts that nothing leaves the device, clicks Add to Chrome.
+FIRST VIEWPORT: Wordmark + Add to Chrome top. Centered headline, one-line offer, two buttons, live death/birth counter line, then the new-tab screenshot rising from the fold.
+FORM: Extension of the established store-listing world; precisely specified simple page, no concept roll.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+-->
+  <header class="top wrap">
+    <a class="mark" href="/" aria-label="Memento home">
+      <img src="/assets/logo-192.png" alt="" width="30" height="30">
+      <span>Memento</span>
+    </a>
+    <nav class="top-nav" aria-label="Main">
+      <a class="link hide-sm" href="#features">Features</a>
+      <a class="link hide-sm" href="#privacy">Privacy</a>
+      <a class="link hide-sm" href="https://github.com/mohiuddin200/MEMENTO">GitHub</a>
+      <a class="btn btn-red btn-sm" href="https://chromewebstore.google.com/detail/khkpihpkonaehkepjhdcpjnnjghflecj">Add to Chrome</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <h1>Every new tab, a quiet <em>reminder</em>.</h1>
+      <p class="lede">You open a new tab hundreds of times a day. Memento makes each one count. It shows the days you likely have left, and how many people the world is losing and gaining right now.</p>
+      <div class="ctas">
+        <a class="btn btn-red" href="https://chromewebstore.google.com/detail/khkpihpkonaehkepjhdcpjnnjghflecj">Add to Chrome — free</a>
+        <a class="btn btn-line" href="https://github.com/mohiuddin200/MEMENTO">View the source</a>
+      </div>
+
+      <p class="since" aria-live="off">
+        Since you opened this page,
+        <span class="n red" id="died">0</span> <span id="died-w">people have died</span>
+        and <span class="n" id="born">0</span> <span id="born-w">have been born</span>.
+      </p>
+      <p class="since-note">Worldwide estimate from World Bank 2024 crude birth and death rates.</p>
+
+      <figure class="window hero-shot">
+        <div class="window-bar" aria-hidden="true"><span class="dots"><i></i><i></i><i></i></span><span class="tab"><img src="/assets/logo-192.png" alt="" width="14" height="14">New Tab</span></div>
+        <img src="/assets/newtab.webp" width="2000" height="1250" alt="The Memento new tab in the light Paper theme: 14,978 days left in large serif numerals, a red live timer, a bar showing 65% of today spent, days lived, and today's births and deaths in the United States.">
+      </figure>
+    </section>
+
+    <section class="story wrap" aria-labelledby="story-title">
+      <h2 id="story-title">Life is not <em>permanent</em>.</h2>
+      <p class="lede">In the second it took this page to load, about two people died somewhere in the world. Four were born.</p>
+      <p class="lede">None of them chose the moment.</p>
+      <p class="lede">We act as if time is endless. We put things off, scroll a little longer, and tell ourselves we’ll start tomorrow. But life isn’t a long road. It’s a counter, and it only goes one way.</p>
+      <p class="lede">Memento isn’t here to scare you. It’s here to wake you up.</p>
+      <p class="lede">Every time you open a tab, you’ll see the days you have left and the world’s births and deaths ticking by. It reminds you that this hour won’t come back, that the scroll can wait and the work can’t.</p>
+      <p class="lede story-end">One day, you’ll be one of those numbers.<br>Until then, make every second count.</p>
+    </section>
+
+    <section class="split wrap" id="features">
+      <figure class="window">
+        <div class="window-bar" aria-hidden="true"><span class="dots"><i></i><i></i><i></i></span><span class="tab"><img src="/assets/logo-192.png" alt="" width="14" height="14">New Tab</span></div>
+        <img src="/assets/world-live.webp" width="1600" height="1000" loading="lazy" alt="Memento showing deaths today worldwide as the big number, about 1.97 every second, with births, deaths and net population change for the world below.">
+      </figure>
+      <div class="copy">
+        <h2>What you’ll see, every time</h2>
+        <dl class="rows">
+          <div><dt>Days left</dt><dd>Your life, counted down. Not in years but in days, ticking away while you read this.</dd></div>
+          <div><dt>Today, draining</dt><dd>A thin red bar that empties as the hours pass. Whatever you do with today, it won’t come back.</dd></div>
+          <div><dt>Your life so far</dt><dd>How long you’ve already lived, and how much of your life is already behind you.</dd></div>
+          <div><dt>The world, live</dt><dd>Every second, about two people die and four are born. It’s a quiet reminder that anyone could be next.</dd></div>
+          <div><dt>Your shortcuts</dt><dd>Your favorite sites are one click away, so the reminder never gets in the way of the work.</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="split split-rev wrap">
+      <div class="copy">
+        <h2>Make it yours</h2>
+        <dl class="rows">
+          <div><dt>Four themes</dt><dd>Paper, Midnight, Dusk and Ember. Pick the mood your reminder wears.</dd></div>
+          <div><dt>Ambient backgrounds</dt><dd>Falling sand, a rising tide, drifting embers, or a heartbeat that sometimes stops.</dd></div>
+          <div><dt>Choose the big number</dt><dd>Your days left, or today’s deaths in your country or the world.</dd></div>
+          <div><dt>Your own background</dt><dd>Any photo you like. It never leaves your device.</dd></div>
+        </dl>
+        <p class="aside">Three questions to start: your birthday, sex and country. That’s it.</p>
+      </div>
+      <figure class="sheet">
+        <img src="/assets/customize.webp" width="916" height="1196" loading="lazy" alt="Memento's settings: theme swatches for Midnight, Dusk, Ember and Paper; ambient choices None, Hourglass, Rising, Embers and Pulse; big number, bottom numbers and day bar options; background image upload.">
+      </figure>
+    </section>
+
+    <section class="facts wrap" id="privacy">
+      <div class="facts-head">
+        <h2>Privacy</h2>
+        <p class="meta">This section is Memento’s privacy policy. Last updated 7 October 2026.</p>
+      </div>
+      <dl class="policy">
+        <div>
+          <dt>What it stores</dt>
+          <dd>Your birthday, sex, country and display settings, your shortcuts, an optional background image, and a 7-day cache of World Bank figures. All of it lives in Chrome’s local storage on your device. Nothing is synced to an account or sent to us.</dd>
+        </div>
+        <div>
+          <dt>What it connects to</dt>
+          <dd>The public World Bank Open Data API (api.worldbank.org), to download life-expectancy, birth-rate, death-rate and population figures. These requests contain none of your data. To show shortcut icons, Chrome loads each shortcut site’s own favicon.</dd>
+        </div>
+        <div>
+          <dt>What it never does</dt>
+          <dd>No accounts, analytics, ads or tracking. No selling or sharing of data. No remote code: everything that runs ships inside the extension.</dd>
+        </div>
+        <div>
+          <dt>Deleting your data</dt>
+          <dd>Remove the extension and Chrome deletes everything it stored. You can also change or clear any setting from the gear icon.</dd>
+        </div>
+        <div>
+          <dt>Where the numbers come from</dt>
+          <dd>Life expectancy, crude birth and death rates and population are the World Bank’s latest figures. Live counters extrapolate those yearly rates and reset at your local midnight. Memento is approximate by design: a warning sign, not a diagnosis.</dd>
+        </div>
+        <div>
+          <dt>Contact</dt>
+          <dd>Questions or problems: <a href="https://github.com/mohiuddin200/MEMENTO/issues">open an issue on GitHub</a>.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="close wrap" aria-labelledby="close-title">
+      <p class="today"><span class="pct" id="pct">0.0%</span> of today is already spent.</p>
+      <div class="daybar" aria-hidden="true"><i id="daybar"></i></div>
+      <h2 id="close-title">Make the rest of it count.</h2>
+      <a class="btn btn-red" href="https://chromewebstore.google.com/detail/khkpihpkonaehkepjhdcpjnnjghflecj">Add Memento to Chrome</a>
+    </section>
+  </main>
+
+  <footer class="foot wrap">
+    <span class="mark mark-sm"><img src="/assets/logo-192.png" alt="" width="20" height="20"><span>Memento</span></span>
+    <nav aria-label="Footer">
+      <a href="https://chromewebstore.google.com/detail/khkpihpkonaehkepjhdcpjnnjghflecj">Chrome Web Store</a>
+      <a href="https://github.com/mohiuddin200/MEMENTO">GitHub</a>
+      <a href="https://github.com/mohiuddin200/MEMENTO/issues">Support</a>
+      <a href="#privacy">Privacy</a>
+    </nav>
+  </footer>
+
+  <script>
+    (function () {
+      // World Bank 2024, World aggregate (same baseline the extension ships).
+      var POP = 8215424893, DEATH = 7.55065418868632, BIRTH = 16.2730070969907;
+      var SEC_PER_YEAR = 31557600;
+      var dps = DEATH / 1000 * POP / SEC_PER_YEAR;
+      var bps = BIRTH / 1000 * POP / SEC_PER_YEAR;
+      var t0 = Date.now();
+      var died = document.getElementById('died'), diedW = document.getElementById('died-w');
+      var born = document.getElementById('born'), bornW = document.getElementById('born-w');
+      var pct = document.getElementById('pct'), bar = document.getElementById('daybar');
+      var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Only deaths roll in (one every ~0.5s); births change ~4x a second,
+      // faster than the roll, so they update plainly.
+      function set(el, n, roll) {
+        var s = n.toLocaleString('en-US');
+        if (el.textContent === s) return;
+        el.textContent = s;
+        if (roll && !still) { el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick'); }
+      }
+
+      function tick() {
+        var secs = (Date.now() - t0) / 1000;
+        var d = Math.floor(secs * dps), b = Math.floor(secs * bps);
+        set(died, d, true);
+        set(born, b, false);
+        diedW.textContent = d === 1 ? 'person has died' : 'people have died';
+        bornW.textContent = b === 1 ? 'has been born' : 'have been born';
+        var now = new Date();
+        var mid = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        var frac = (now.getTime() - mid) / 86400000;
+        pct.textContent = (frac * 100).toFixed(1) + '%';
+        bar.style.width = (frac * 100).toFixed(2) + '%';
+      }
+
+      tick();
+      setInterval(tick, 200);
+    })();
+  </script>
+</body>
+</html>
