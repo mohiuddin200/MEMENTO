@@ -11,6 +11,7 @@
   var S = window.MementoStats;
   var Api = window.MementoApi;
   var SETTINGS_KEY = 'memento.settings';
+  var BG_KEY = 'memento.bg'; // the background image, kept apart from the small settings record
   var SHORTCUTS_KEY = 'memento.shortcuts';
   var SHORTCUTS_MAX = 12; // one row's worth — the strip must not eat the page
 
@@ -170,11 +171,27 @@
       theme: THEMES.indexOf(raw.theme) >= 0 ? raw.theme : DEFAULT_THEME,
       hero: HEROS.indexOf(raw.hero) >= 0 ? raw.hero : 'days-left',
       ambient: AMBIENTS.indexOf(raw.ambient) >= 0 ? raw.ambient : DEFAULT_AMBIENT,
-      bg: typeof raw.bg === 'string' && raw.bg.slice(0, 11) === 'data:image/' ? raw.bg : null,
+      bg: validBg(raw.bg), // only pre-1.5 records stored it here; see init()
       scope: raw.scope === 'world' ? 'world' : 'country',
       customLE: le,
       daybar: raw.daybar === false ? false : true,
     };
+  }
+
+  function validBg(v) {
+    return typeof v === 'string' && v.slice(0, 11) === 'data:image/' ? v : null;
+  }
+
+  // The settings record never carries the image: a background is hundreds of
+  // KB, and the settings are rewritten on every small change (the scope pill).
+  function persistSettings() {
+    var copy = Object.assign({}, settings);
+    delete copy.bg;
+    storage.set(SETTINGS_KEY, copy);
+  }
+
+  function persistBg() {
+    storage.set(BG_KEY, settings.bg || null);
   }
 
   function validLe(v) {
@@ -1058,6 +1075,7 @@
     };
     var parsed = parseSettings(candidate);
     if (!parsed) return;
+    var bgChanged = pendingBg !== undefined;
     settings = parsed;
     previewTheme = null;
     previewHero = null;
@@ -1069,7 +1087,8 @@
     applyTheme(settings.theme);
     applyBg(settings.bg);
     closeCal();
-    storage.set(SETTINGS_KEY, parsed);
+    persistSettings();
+    if (bgChanged) persistBg();
     backdrop.hidden = true;
     update();
   });
@@ -1114,7 +1133,7 @@
   scopeBtn.addEventListener('click', function () {
     if (!settings) return;
     settings.scope = settings.scope === 'world' ? 'country' : 'world';
-    storage.set(SETTINGS_KEY, settings);
+    persistSettings();
     update();
   });
 
@@ -1232,9 +1251,18 @@
       shortcuts = scFromUrl;
     }
 
-    Promise.all([storage.get(SETTINGS_KEY), storage.get(SHORTCUTS_KEY)])
+    Promise.all([storage.get(SETTINGS_KEY), storage.get(SHORTCUTS_KEY), storage.get(BG_KEY)])
       .then(function (bags) {
         settings = parseSettings(fromUrl) || parseSettings(bags[0] && bags[0][SETTINGS_KEY]);
+        if (settings && !fromUrl) {
+          var storedBg = validBg(bags[2] && bags[2][BG_KEY]);
+          var legacyBg = settings.bg; // pre-1.5 records kept the image inline
+          settings.bg = storedBg || legacyBg;
+          if (legacyBg) {
+            if (!storedBg) persistBg(); // move the image to its own key…
+            persistSettings();          // …and drop it from the settings record
+          }
+        }
         if (!scFromUrl) shortcuts = parseShortcuts(bags[1] && bags[1][SHORTCUTS_KEY]);
         renderShortcuts();
 

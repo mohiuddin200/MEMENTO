@@ -314,9 +314,10 @@ function findAll(root, cls, out = []) {
     const stored = JSON.parse(storageBacking['memento.settings']);
     assert.deepStrictEqual(stored, {
       birthday: '1990-06-15', sex: 'male', country: 'BGD',
-      theme: 'snow', hero: 'days-left', bg: null,
+      theme: 'snow', hero: 'days-left',
       scope: 'country', customLE: null, daybar: true, ambient: 'nebula',
-    });
+    }, 'no image in the settings record');
+    assert.ok(!('memento.bg' in storageBacking), 'no background chosen → nothing written for it');
     assert.ok(/^\d{1,2},\d{3}$/.test(byId['days-left'].textContent), 'days left: ' + byId['days-left'].textContent);
     assert.ok(/^\d{2}:\d{2}:\d{2}\.\d{3}$/.test(byId.hms.textContent), 'hms with ms: ' + byId.hms.textContent);
     assert.strictEqual(byId['days-label'].textContent, 'days left');
@@ -634,6 +635,9 @@ function findAll(root, cls, out = []) {
     await flush();
     assert.ok(env2.document.body.classList.contains('hasbg'), 'body flagged as having a background');
     assert.ok(byId2.bgimg.style.backgroundImage.indexOf(bgData) !== -1, 'image set on the layer');
+    // pre-1.5 record migrated: image moved to its own key, settings slimmed
+    assert.strictEqual(JSON.parse(bgStore['memento.bg']), bgData, 'image moved to memento.bg');
+    assert.ok(!('bg' in JSON.parse(bgStore['memento.settings'])), 'image dropped from settings');
 
     byId2.gear.click();
     assert.strictEqual(byId2['f-bg-remove'].hidden, false, 'remove button visible');
@@ -646,6 +650,31 @@ function findAll(root, cls, out = []) {
     assert.ok(amb.indexOf('nebula:paused') !== -1,
       'a covering image pauses the animation: ' + amb);
     assert.ok(amb.indexOf('nebula →') !== -1, 'removing it resumes: ' + amb);
+  });
+
+  await test('background image: kept out of settings writes, saved and removed under its own key', async () => {
+    const bgData = 'data:image/jpeg;base64,/9j/4AAQSkZJRg==';
+    const store = {
+      'memento.settings': JSON.stringify({
+        birthday: '1990-06-15', sex: 'male', country: 'BGD', theme: 'snow', hero: 'days-left',
+      }),
+      'memento.bg': JSON.stringify(bgData),
+    };
+    const byIdB = buildDom();
+    const envB = makeEnv(byIdB, store);
+    loadApp(envB.sandboxGlobals);
+    await flush();
+    assert.ok(envB.document.body.classList.contains('hasbg'), 'image loaded from memento.bg');
+
+    byIdB['scope-btn'].click(); // a small settings change…
+    assert.ok(!('bg' in JSON.parse(store['memento.settings'])), '…never rewrites the image');
+    assert.strictEqual(JSON.parse(store['memento.bg']), bgData, 'image untouched');
+
+    byIdB.gear.click();
+    byIdB['f-bg-remove'].click();
+    byIdB.save.click();
+    assert.strictEqual(JSON.parse(store['memento.bg']), null, 'removal persisted under its own key');
+    assert.strictEqual(envB.document.body.classList.contains('hasbg'), false);
   });
 
   await test('reload: settings persist, no modal, saved hero mode renders', async () => {
