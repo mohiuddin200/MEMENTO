@@ -176,7 +176,7 @@ MEMENTO/
 ├── tests/               # node test suites + render-test screenshots
 ├── store/listing/       # Chrome Web Store listing copy + screenshots (generated)
 ├── docs/screenshots/    # README images
-└── tools/               # generators: baseline.js, lifetables.js, icons, screenshots
+└── tools/               # generators (baseline, life tables, icons, screenshots) + store packager
 ```
 
 No framework, no build step, no CDN — vanilla HTML/CSS/JS only.
@@ -224,4 +224,5 @@ Omit them all to see the first-run setup modal.
 node tools/gen-baseline.js   # refresh js/baseline.js from the live API
 node tools/gen-icons.js      # redraw icons/icon*.png
 node tools/gen-lifetables.js <WPP2024_Life_Table_Abridged_Medium_2024-2100.csv.gz>  # refresh js/lifetables.js
+node tools/pack.js           # build memento-<version>.zip for the Chrome Web Store
 ```

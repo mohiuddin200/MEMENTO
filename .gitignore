@@ -1,4 +1,4 @@
-# Store upload package — regenerate with zip when publishing
+# Store upload package — build with `node tools/pack.js`
 memento-*.zip
 
 # Local agent workspace state

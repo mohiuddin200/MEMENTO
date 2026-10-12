@@ -1,15 +1,16 @@
 # Chrome Web Store listing — Memento 1.3.0
 
 Copy-paste values for the developer dashboard, tab by tab. The images are in
-this folder. The package is `memento-1.3.0.zip` in the repo root, and it
-matches the current source.
+this folder (regenerate them with `node tools/store-shots.js`).
 
 ---
 
 ## Package
 
-- Upload `memento-1.3.0.zip` from the repo root (only if the dashboard asks
-  for a new package — version 1.3.0).
+- Build it: `node tools/pack.js` writes `memento-<version>.zip` to the repo
+  root with only the extension's runtime files (manifest, page, CSS, JS,
+  icons) and fails if anything they reference is missing.
+- Upload that zip whenever the version in `manifest.json` is bumped.
 
 ---
 
