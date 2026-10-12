@@ -761,6 +761,7 @@ function findAll(root, cls, out = []) {
     assert.strictEqual(link.href, 'https://github.com/');
     assert.strictEqual(findAll(chips[0], 'sc-name')[0].textContent, 'GitHub');
     assert.strictEqual(findAll(chips[0], 'sc-letter')[0].textContent, 'G', 'letter tile until favicon loads');
+    assert.ok(!findAll(chips[0], 'sc-ico')[0].src, 'outside the extension no icon is fetched at all');
     assert.strictEqual(byId['sc-row'].children.length, 2, 'chip + add button');
   });
 

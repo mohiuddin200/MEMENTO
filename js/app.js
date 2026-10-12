@@ -834,8 +834,12 @@
     try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return ''; }
   }
 
+  // Icons come from Chrome's own favicon cache (the "favicon" permission), so
+  // no request ever reaches the shortcut's site. Outside the extension there
+  // is no cache to ask, and the letter tile stays.
   function faviconUrl(u) {
-    try { return new URL(u).origin + '/favicon.ico'; } catch (e) { return ''; }
+    if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.getURL) return '';
+    return chrome.runtime.getURL('/_favicon/?pageUrl=' + encodeURIComponent(u) + '&size=32');
   }
 
   function parseShortcuts(raw) {
@@ -889,7 +893,8 @@
       ico.alt = '';
       ico.hidden = true;
       ico.onload = function () { ico.hidden = false; letter.hidden = true; };
-      ico.src = faviconUrl(item.url);
+      var icoSrc = faviconUrl(item.url);
+      if (icoSrc) ico.src = icoSrc;
 
       var name = document.createElement('span');
       name.className = 'sc-name';

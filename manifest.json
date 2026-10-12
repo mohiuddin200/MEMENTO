@@ -3,7 +3,7 @@
   "name": "Memento — Death Clock & Death Rate",
   "short_name": "Memento",
   "version": "1.4.0",
-  "minimum_chrome_version": "88",
+  "minimum_chrome_version": "104",
   "homepage_url": "https://github.com/mohiuddin200/MEMENTO",
   "description": "A memento mori new tab: your personal death countdown, plus the real-time birth and death rate for your country or the world.",
   "chrome_url_overrides": {
@@ -15,6 +15,6 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": ["storage", "unlimitedStorage"],
+  "permissions": ["storage", "unlimitedStorage", "favicon"],
   "host_permissions": ["https://api.worldbank.org/*"]
 }

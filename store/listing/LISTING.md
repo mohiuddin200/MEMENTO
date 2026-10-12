@@ -45,7 +45,7 @@ Answer three questions (birthday, sex and country; 217 countries plus World) and
 PRIVATE BY DESIGN
 • Everything you enter stays on your device, in Chrome's local storage
 • No account, no sign-up, no analytics, no tracking
-• The extension only contacts the free World Bank Open Data API for life-expectancy and population figures (cached for 7 days, with a built-in offline fallback), plus the sites you add as shortcuts, to show their icons
+• The extension only contacts the free World Bank Open Data API for life-expectancy and population figures (cached for 7 days, with a built-in offline fallback); shortcut icons come from Chrome's own favicon cache, so the sites you add are never contacted
 • Animations go still if your system asks to reduce motion
 
 ABOUT THE NUMBERS
@@ -102,6 +102,12 @@ Saves the user's settings (birthday, sex, country, theme and display options), t
 
 ```
 Users can set their own background image. It is downscaled (max 1920px, JPEG) and stored locally as a data URL; together with the cached World Bank dataset this can exceed the default chrome.storage.local quota. The data never leaves the device.
+```
+
+**favicon**
+
+```
+Shows the icon of each shortcut the user adds to the new tab, read from Chrome's own local favicon cache, so the shortcut's website is never contacted.
 ```
 
 **Host permission (https://api.worldbank.org/\*)**

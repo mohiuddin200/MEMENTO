@@ -65,9 +65,9 @@ themeable, with your own background image.
   `0 days — you're beating the average; every day is a bonus` and counts your
   bonus days up.
 - **Shortcut chips:** get your most-used sites back on the new tab — click **+**
-  under the wordmark to add a shortcut (favicon shown automatically, letter tile
-  as fallback), hover a chip to edit or remove it. Stored locally, capped at 12,
-  no new permissions.
+  under the wordmark to add a shortcut (icon read from Chrome's own favicon
+  cache, so the site is never contacted; letter tile as fallback), hover a chip
+  to edit or remove it. Stored locally, capped at 12.
 - **Ambient backgrounds:** a quiet animated layer behind everything — luminous
   clouds drifting across the whole screen (**Nebula**, the default), a
   starfield that leans with your cursor (**Stars**), an hourglass of red sand
@@ -164,7 +164,7 @@ baseline (`js/baseline.js`) takes over and the badge says "offline baseline".
 
 ```
 MEMENTO/
-├── manifest.json        # MV3, chrome_url_overrides.newtab, storage + worldbank host
+├── manifest.json        # MV3, chrome_url_overrides.newtab, storage + favicon + worldbank host
 ├── newtab.html
 ├── css/newtab.css       # themeable (4 light + 1 dark), vignette + film grain, red accent
 ├── js/stats.js          # pure math: countdowns, rates (unit-testable)
