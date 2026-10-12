@@ -32,8 +32,8 @@ ON EVERY NEW TAB
 • Bonus mode: outlived the average? It counts your bonus days instead
 
 MAKE IT YOURS
-• Four themes: Paper (light), Midnight, Dusk and Ember
-• Ambient backgrounds: falling hourglass sand, a rising tide, drifting embers, a heartbeat that sometimes flatlines, or none at all
+• Five themes — Snow, Paper, Dawn, Linen and Midnight — or follow your system's light/dark mode
+• Ambient backgrounds: drifting nebula clouds, falling hourglass sand, a starfield, a rising tide, drifting embers, a heartbeat that sometimes flatlines, or none at all
 • Choose the big number: your days left, deaths today in your country, or deaths today worldwide
 • Life expectancy your way: the average for someone of your age, sex and country, or your own estimate
 • Your own background photo, resized and stored on your device

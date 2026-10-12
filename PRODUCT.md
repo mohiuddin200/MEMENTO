@@ -27,7 +27,7 @@ A death clock that is honest about its numbers: UN life tables (age-adjusted) an
 - Days-left countdown with a live hh:mm:ss.mmm sub-counter; bonus-days mode once the expectancy is passed.
 - Day bar (today draining), life-so-far line and progress bar, daily one-liner.
 - Real-time deaths/second, births today, deaths today, net change today for one country (217 + World) or the world.
-- Shortcut chips (max 12), four themes (Paper, Midnight, Dusk, Ember) plus a System option that follows the device's light/dark mode, five ambient modes (None, Hourglass, Rising, Embers, Pulse), hero choice (days left / country deaths / world deaths), own background image.
+- Shortcut chips (max 12), five themes (Snow — the default, Paper, Dawn, Linen, Midnight) plus a System option that follows the device's light/dark mode, seven ambient modes (Nebula — the default, Hourglass, Stars, Rising, Embers, Pulse, None), hero choice (days left / country deaths / world deaths), own background image.
 - Permissions: `storage`, `unlimitedStorage`, `favicon`, host `https://api.worldbank.org/*`. No analytics, no accounts, no remote code.
 - Chrome Web Store item ID: `khkpihpkonaehkepjhdcpjnnjghflecj`. Listing may still be in review.
 

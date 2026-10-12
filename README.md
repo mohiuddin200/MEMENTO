@@ -174,9 +174,9 @@ MEMENTO/
 ├── js/app.js            # setup modal, tickers, country picker, one-liners
 ├── icons/icon{16,32,48,128}.png
 ├── tests/               # node test suites + render-test screenshots
-├── store/               # Chrome Web Store listing screenshots (1280×800)
+├── store/listing/       # Chrome Web Store listing copy + screenshots (generated)
 ├── docs/screenshots/    # README images
-└── tools/               # one-shot generators for baseline.js and the icons
+└── tools/               # generators: baseline.js, lifetables.js, icons, screenshots
 ```
 
 No framework, no build step, no CDN — vanilla HTML/CSS/JS only.
@@ -198,6 +198,18 @@ google-chrome --headless=new --disable-gpu --screenshot=/tmp/shot.png \
   "file://$PWD/newtab.html?birthday=1990-06-15&sex=male&country=BGD&theme=midnight&ambient=nebula&hero=deaths-world"
 ```
 
+### Regenerating screenshots
+
+The store screenshots (`store/listing/`) and the landing page's settings image
+are rendered from the real UI, so they never drift from it:
+
+```sh
+node tools/store-shots.js   # needs google-chrome (or CHROME=/path/to/chrome), Node 22+
+```
+
+Layouts live in `tools/store/listing.html`; `tools/shot.js` is the
+dependency-free headless-Chrome screenshotter behind it.
+
 URL params: `birthday`, `sex`, `country`, `theme` (snow|paper|dawn|linen|midnight|system),
 `ambient` (nebula|hourglass|stars|tide|embers|pulse|none),
 `hero` (days-left|deaths-country|deaths-world), `le` (custom life expectancy in
@@ -211,4 +223,5 @@ Omit them all to see the first-run setup modal.
 ```sh
 node tools/gen-baseline.js   # refresh js/baseline.js from the live API
 node tools/gen-icons.js      # redraw icons/icon*.png
+node tools/gen-lifetables.js <WPP2024_Life_Table_Abridged_Medium_2024-2100.csv.gz>  # refresh js/lifetables.js
 ```
