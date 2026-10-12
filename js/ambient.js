@@ -1,11 +1,13 @@
 /*
  * Memento — ambient animated backgrounds, one canvas behind the vignette
- * and grain: hourglass (the day draining as falling red sand), tide (a dark
- * level rising through the day), embers (a slow funeral drift), pulse (a
- * heartbeat trace that occasionally flatlines).
+ * and grain: nebula (luminous clouds drifting across the whole screen),
+ * stars (a drifting starfield that leans with the cursor), hourglass (the
+ * day draining as falling red sand), tide (a dark level rising through the
+ * day), embers (a slow funeral drift), pulse (a heartbeat trace that
+ * occasionally flatlines).
  * Theme-aware — blood-red with additive glow on dark themes, plain ink on
- * Paper. Still under prefers-reduced-motion, blank while a custom background
- * image is set (paused), zero work when hidden or set to 'none'.
+ * light themes. Still under prefers-reduced-motion, blank while a custom
+ * background image is set (paused), zero work when hidden or set to 'none'.
  * app.js drives it via MementoAmbient.set(mode, { paused }).
  */
 (function (root, factory) {
@@ -14,12 +16,12 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var MODES = ['none', 'hourglass', 'tide', 'embers', 'pulse'];
+  var MODES = ['none', 'hourglass', 'tide', 'embers', 'pulse', 'nebula', 'stars'];
 
   // "Barely there" tuning — one block so loudness is a one-line change later.
   var INTENSITY = {
-    master: 0.6,           // global opacity multiplier on dark themes
-    masterLight: 0.45,     // …on the light paper theme
+    master: 0.68,           // global opacity multiplier on dark themes
+    masterLight: 0.45,      // …on the light themes
     hourglass: {
       streamRate: 22,      // grains falling per second
       maxGrains: 220,
@@ -45,6 +47,17 @@
       tailFade: 8.5,       // keep points long enough to span a whole sweep
       tailBright: 0.7,     // seconds of bright tail behind the pen
       fadeOut: 0.8,        // seconds a finished trace lingers before clearing
+    },
+    nebula: {
+      blobs: 8,            // drifting cloud count
+      alpha: 0.42,         // peak center alpha per cloud on dark (before op())
+      alphaLight: 0.22,    // …on light themes, where additive glow doesn't apply
+    },
+    stars: {
+      count: 130,
+      drift: 7,            // px/s the field slides (scaled by depth)
+      parallax: 26,        // px the nearest layer shifts with the cursor
+      redShare: 0.08,      // share of stars in the theme red
     },
   };
 
@@ -105,6 +118,7 @@
   var reducedMotion = false;
   var prevProgress = 0;
   var hooked = false;
+  var pointerX = 0, pointerY = 0; // cursor position as -1..1 (stars parallax)
 
   var pal = {
     light: false,
@@ -202,6 +216,12 @@
     try {
       if (typeof window !== 'undefined' && window.addEventListener) {
         window.addEventListener('resize', onResize);
+        // The starfield leans toward the cursor: near layers more than far.
+        window.addEventListener('mousemove', function (ev) {
+          if (reducedMotion || !ev || typeof ev.clientX !== 'number') return;
+          pointerX = clamp((ev.clientX / (width || 1)) * 2 - 1, -1, 1);
+          pointerY = clamp((ev.clientY / (height || 1)) * 2 - 1, -1, 1);
+        }, { passive: true });
       }
       if (typeof matchMedia === 'function') {
         var mq = matchMedia('(prefers-reduced-motion: reduce)');
@@ -753,9 +773,147 @@
     return { init: init, step: step, still: still };
   })();
 
+  // ---------- nebula: luminous clouds drifting across the whole screen ----------
+
+  var Nebula = (function () {
+    var C = INTENSITY.nebula;
+    var clouds = [];
+
+    // A companion hue derived from the theme red, shifted toward a luminous
+    // indigo/violet, so dark themes get depth instead of a flat wash.
+    function indigoOf(rgb) {
+      return [
+        Math.round(rgb[0] * 0.25 + 45),
+        Math.round(rgb[1] * 0.25 + 65),
+        Math.round(rgb[2] * 0.15 + 180),
+      ];
+    }
+
+    function colorOf(c) {
+      if (c.tint === 0) return pal.red;
+      if (c.tint === 1) return indigoOf(pal.red);
+      return pal.bone; // pale mist on dark, soft shading on light
+    }
+
+    function spawn(i, n) {
+      return {
+        ax: (i + 0.5) / n,            // anchor, fraction of width
+        ay: rand(0.12, 0.88),
+        rr: rand(0.3, 0.6),           // radius, fraction of max(w,h)
+        tint: i % 3,
+        sx: rand(0.05, 0.11),         // drift frequencies (1/s)
+        sy: rand(0.04, 0.09),
+        sr: rand(0.05, 0.1),
+        sa: rand(0.1, 0.2),
+        px: rand(0, Math.PI * 2),
+        py: rand(0, Math.PI * 2),
+        pr: rand(0, Math.PI * 2),
+        pa: rand(0, Math.PI * 2),
+        axAmp: rand(0.06, 0.16),      // drift amplitudes, fractions of the viewport
+        ayAmp: rand(0.08, 0.2),
+        baseA: rand(0.55, 1),
+      };
+    }
+
+    function init() {
+      clouds = [];
+      for (var i = 0; i < C.blobs; i++) clouds.push(spawn(i, C.blobs));
+    }
+
+    // Motion is a pure function of time: reloads and missed frames keep the
+    // same sky, and resize needs nothing but a redraw.
+    function draw(t) {
+      var m = Math.max(width, height);
+      var base = pal.light ? C.alphaLight : C.alpha;
+      var prev = ctx.globalCompositeOperation;
+      if (!pal.light && prev !== undefined) ctx.globalCompositeOperation = 'lighter';
+      for (var i = 0; i < clouds.length; i++) {
+        var c = clouds[i];
+        var x = (c.ax + Math.sin(t * c.sx + c.px) * c.axAmp) * width;
+        var y = (c.ay + Math.cos(t * c.sy + c.py) * c.ayAmp) * height;
+        var r = c.rr * m * (1 + 0.18 * Math.sin(t * c.sr + c.pr));
+        var a = base * c.baseA * (0.72 + 0.28 * Math.sin(t * c.sa + c.pa));
+        var col = colorOf(c);
+        var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, rgba(col, op(a)));
+        g.addColorStop(0.6, rgba(col, op(a * 0.6)));
+        g.addColorStop(1, rgba(col, 0));
+        ctx.fillStyle = g;
+        ctx.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+      if (prev !== undefined) ctx.globalCompositeOperation = prev || 'source-over';
+    }
+
+    function step(dt, t) { draw(t); }
+    function still() { draw(4.2); }
+
+    return { init: init, step: step, still: still };
+  })();
+
+  // ---------- stars: a drifting starfield that leans with the cursor ----------
+
+  var Stars = (function () {
+    var C = INTENSITY.stars;
+    var st = [];
+    var mx = 0, my = 0; // eased cursor offset toward pointerX/Y
+
+    function spawn() {
+      var z = Math.random(); // 0 far … 1 near
+      return {
+        fx: rand(-0.04, 1.04),
+        fy: rand(-0.02, 1.02),
+        z: z,
+        size: 0.6 + z * z * 1.9,
+        ph: rand(0, Math.PI * 2),
+        tw: rand(0.4, 1.6), // twinkle frequency
+        red: Math.random() < C.redShare,
+      };
+    }
+
+    function init() {
+      st = [];
+      for (var i = 0; i < C.count; i++) st.push(spawn());
+    }
+
+    function step(dt, t) {
+      mx += (pointerX - mx) * Math.min(1, dt * 2.2);
+      my += (pointerY - my) * Math.min(1, dt * 2.2);
+      draw(t);
+    }
+
+    function draw(t) {
+      var scale = height / 800;
+      for (var i = 0; i < st.length; i++) {
+        var s = st[i];
+        var dx = (s.fx * width + t * C.drift * (0.25 + s.z) * scale) % (width + 40);
+        if (dx < -20) dx += width + 40;
+        dx -= 20;
+        var dy = s.fy * height + Math.sin(t * 0.07 + s.ph) * 14 * s.z;
+        // cursor parallax: near layers swing more
+        dx -= mx * C.parallax * s.z;
+        dy -= my * C.parallax * 0.6 * s.z;
+        var tw = 0.55 + 0.45 * Math.sin(t * s.tw + s.ph);
+        var a = (0.25 + 0.75 * s.z) * tw;
+        // warm-white stars (dark ink on light themes), a few in theme red
+        var col = s.red ? pal.red : pal.bone;
+        if (!pal.light && s.z > 0.75 && !s.red) drawGlow(dx, dy, s.size * 6, op(0.1 * tw));
+        ctx.fillStyle = rgba(col, op(a));
+        ctx.beginPath();
+        ctx.arc(dx, dy, s.size * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function still() { mx = my = 0; draw(1); }
+
+    return { init: init, step: step, still: still };
+  })();
+
   // ---------- registry ----------
 
   var REGISTRY = {
+    nebula: Nebula,
+    stars: Stars,
     hourglass: Hourglass,
     tide: Tide,
     embers: Embers,

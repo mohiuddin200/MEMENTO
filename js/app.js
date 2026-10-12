@@ -14,9 +14,20 @@
   var SHORTCUTS_KEY = 'memento.shortcuts';
   var SHORTCUTS_MAX = 12; // one row's worth — the strip must not eat the page
 
-  var THEMES = ['midnight', 'dusk', 'ember', 'paper'];
+  var THEMES = ['snow', 'paper', 'dawn', 'linen', 'midnight', 'system'];
+  var DEFAULT_THEME = 'snow';
+  // 'system' resolves to the light or dark side of the lineup from the OS
+  // preference; these two are what it swings between.
+  var SYSTEM_LIGHT = 'snow';
+  var SYSTEM_DARK = 'midnight';
+  // Browser chrome color per resolved theme (<meta name="theme-color">).
+  var THEME_BG = {
+    snow: '#fbfbfc', paper: '#f4f1ea', dawn: '#faf3ec',
+    linen: '#eef0f4', midnight: '#08080a',
+  };
   var HEROS = ['days-left', 'deaths-country', 'deaths-world'];
-  var AMBIENTS = ['none', 'hourglass', 'tide', 'embers', 'pulse'];
+  var AMBIENTS = ['nebula', 'hourglass', 'stars', 'tide', 'embers', 'pulse', 'none'];
+  var DEFAULT_AMBIENT = 'nebula';
   var LE_MIN = 20, LE_MAX = 120; // sanity bounds for a custom life expectancy
   var BG_MAX_EDGE = 1920; // downscale uploads so storage stays small
 
@@ -81,10 +92,21 @@
   var scopeBtn = $('scope-btn');
   var badgeEl = $('data-badge');
   var backdrop = $('modal-backdrop');
+  var modalCloseBtn = $('modal-close');
+  var themeMetaEl = $('theme-color-meta');
   var birthdayField = $('f-birthday');
+  var calWrap = $('cal-wrap');
   var calEl = $('cal');
-  var calTitle = $('cal-title');
+  var calHead = $('cal-head');
+  var calPickHead = $('cal-pick-head');
+  var calPickBack = $('cal-pick-back');
+  var calPickTitle = $('cal-pick-title');
+  var calTitleM = $('cal-title-m');
+  var calTitleY = $('cal-title-y');
+  var calWeek = $('cal-week');
   var calDays = $('cal-days');
+  var calMonths = $('cal-months');
+  var calYears = $('cal-years');
   var sexBox = $('f-sex');
   var leBox = $('f-le');
   var leInput = $('f-le-years');
@@ -100,6 +122,7 @@
   var bgRemoveBtn = $('f-bg-remove');
   var bgFileInput = $('f-bg-file');
   var saveBtn = $('save');
+  var saveHint = $('save-hint');
   var scNav = $('shortcuts');
   var scRow = $('sc-row');
   var scPop = $('sc-pop');
@@ -144,9 +167,9 @@
       birthday: raw.birthday,
       sex: raw.sex,
       country: raw.country,
-      theme: THEMES.indexOf(raw.theme) >= 0 ? raw.theme : 'midnight',
+      theme: THEMES.indexOf(raw.theme) >= 0 ? raw.theme : DEFAULT_THEME,
       hero: HEROS.indexOf(raw.hero) >= 0 ? raw.hero : 'days-left',
-      ambient: AMBIENTS.indexOf(raw.ambient) >= 0 ? raw.ambient : 'hourglass',
+      ambient: AMBIENTS.indexOf(raw.ambient) >= 0 ? raw.ambient : DEFAULT_AMBIENT,
       bg: typeof raw.bg === 'string' && raw.bg.slice(0, 11) === 'data:image/' ? raw.bg : null,
       scope: raw.scope === 'world' ? 'world' : 'country',
       customLE: le,
@@ -163,7 +186,7 @@
 
   function effectiveTheme() {
     return previewTheme || urlOverrides.theme ||
-      (settings && settings.theme) || 'midnight';
+      (settings && settings.theme) || DEFAULT_THEME;
   }
 
   function effectiveHero() {
@@ -182,13 +205,35 @@
     return settings ? settings.daybar : true;
   }
 
-  function applyTheme(theme) {
-    if (body && body.dataset) body.dataset.theme = theme;
+  // 'system' is a stored pseudo-theme: it follows the OS light/dark
+  // preference, resolving to Snow in light mode and Midnight in dark.
+  function systemPrefersDark() {
+    try {
+      return typeof matchMedia === 'function' &&
+        matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch (e) { return false; }
   }
+
+  function resolveTheme(choice) {
+    if (choice !== 'system') return choice;
+    return systemPrefersDark() ? SYSTEM_DARK : SYSTEM_LIGHT;
+  }
+
+  function applyTheme(theme) {
+    var resolved = resolveTheme(theme);
+    if (body && body.dataset) body.dataset.theme = resolved;
+    // the browser chrome (tab strip) follows the page
+    if (themeMetaEl) {
+      themeMetaEl.setAttribute('content', THEME_BG[resolved] || THEME_BG[DEFAULT_THEME]);
+    }
+  }
+
+  // A live 'system' theme follows the OS preference without a reload — the
+  // listener is wired in init(), once per load.
 
   function effectiveAmbient() {
     return previewAmbient || urlOverrides.ambient ||
-      (settings && settings.ambient) || 'hourglass';
+      (settings && settings.ambient) || DEFAULT_AMBIENT;
   }
 
   function applyBg(dataUrl) {
@@ -368,7 +413,9 @@
 
   // ---------- birthday calendar picker ----------
 
-  var cal = { open: false, y: 0, m: 0 }; // month being viewed
+  // cal.view: 'days' (month grid) | 'months' | 'years' (quick-pick lists)
+  var cal = { open: false, view: 'days', y: 0, m: 0 };
+  var YEAR_MIN = 1900; // matches the disabled-cell bound in renderCal
 
   function isoOf(y, m, d) {
     return y + '-' + pad2(m + 1) + '-' + pad2(d);
@@ -391,11 +438,13 @@
     cal.m = base.getMonth();
     cal.open = true;
     calEl.hidden = false;
+    showCalView('days');
     renderCal();
   }
 
   function closeCal() {
     cal.open = false;
+    cal.view = 'days';
     calEl.hidden = true;
   }
 
@@ -406,9 +455,24 @@
     renderCal();
   }
 
+  // Swap between the month grid and the month/year quick-pick lists.
+  function showCalView(view) {
+    cal.view = view;
+    var days = view === 'days';
+    calHead.hidden = !days;
+    calWeek.hidden = !days;
+    calDays.hidden = !days;
+    calMonths.hidden = view !== 'months';
+    calYears.hidden = view !== 'years';
+    calPickHead.hidden = days;
+    if (!days) setText(calPickTitle, view === 'years' ? 'Pick a year' : 'Pick a month');
+  }
+
   function renderCal() {
-    setText(calTitle, new Date(cal.y, cal.m, 1)
-      .toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+    var label = new Date(cal.y, cal.m, 1)
+      .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    setText(calTitleM, label.replace(/\s+\d+$/, '')); // "June"
+    setText(calTitleY, String(cal.y));                 // "1990"
     calDays.innerHTML = '';
     var first = new Date(cal.y, cal.m, 1);
     var start = new Date(cal.y, cal.m, 1 - first.getDay());
@@ -424,9 +488,48 @@
       if (d.getMonth() !== cal.m) btn.classList.add('dim');
       if (iso === todayIso) btn.classList.add('today');
       if (iso === birthdayField.value) btn.classList.add('sel');
-      if (iso > todayIso || d.getFullYear() < 1900) btn.disabled = true;
+      if (iso > todayIso || d.getFullYear() < YEAR_MIN) btn.disabled = true;
       btn.addEventListener('click', makePickDay(iso));
       calDays.appendChild(btn);
+    }
+  }
+
+  // The year list: every pickable birth year, newest first, scrolled to the
+  // year currently in view — one click instead of dozens of arrow steps.
+  function renderYears() {
+    calYears.innerHTML = '';
+    var nowY = new Date().getFullYear();
+    for (var y = nowY; y >= YEAR_MIN; y--) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cal-ypick';
+      setText(btn, String(y));
+      btn.setAttribute('data-y', String(y));
+      if (y === cal.y) btn.classList.add('sel');
+      if (y === nowY) btn.classList.add('today');
+      btn.addEventListener('click', makePickYear(y));
+      calYears.appendChild(btn);
+    }
+    var focusEl = calYears.children[0];
+    for (var i = 0; i < calYears.children.length; i++) {
+      if (calYears.children[i].classList.contains('sel')) { focusEl = calYears.children[i]; break; }
+    }
+    if (focusEl && typeof focusEl.scrollIntoView === 'function') {
+      focusEl.scrollIntoView({ block: 'center' });
+    }
+  }
+
+  function renderMonths() {
+    calMonths.innerHTML = '';
+    for (var m = 0; m < 12; m++) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cal-mpick';
+      setText(btn, new Date(2001, m, 1).toLocaleDateString('en-US', { month: 'short' }));
+      btn.setAttribute('data-m', String(m));
+      if (m === cal.m) btn.classList.add('sel');
+      btn.addEventListener('click', makePickMonth(m));
+      calMonths.appendChild(btn);
     }
   }
 
@@ -439,6 +542,22 @@
     };
   }
 
+  function makePickYear(y) {
+    return function () {
+      cal.y = y;
+      showCalView('days');
+      renderCal();
+    };
+  }
+
+  function makePickMonth(m) {
+    return function () {
+      cal.m = m;
+      showCalView('days');
+      renderCal();
+    };
+  }
+
   birthdayField.addEventListener('click', function () {
     if (cal.open) closeCal();
     else openCal();
@@ -447,6 +566,26 @@
   $('cal-next').addEventListener('click', function () { navCal(0, 1); });
   $('cal-prevy').addEventListener('click', function () { navCal(-1, 0); });
   $('cal-nexty').addEventListener('click', function () { navCal(1, 0); });
+  calTitleM.addEventListener('click', function () {
+    renderMonths();
+    showCalView('months');
+  });
+  calTitleY.addEventListener('click', function () {
+    renderYears();
+    showCalView('years');
+  });
+  calPickBack.addEventListener('click', function () { showCalView('days'); });
+
+  // Click outside the calendar (still inside the modal) closes it too.
+  document.addEventListener('click', function (ev) {
+    if (!cal.open) return;
+    var n = ev.target;
+    while (n) {
+      if (n === calWrap) return;
+      n = n.parentNode;
+    }
+    closeCal();
+  });
 
   // ---------- country picker ----------
 
@@ -764,6 +903,7 @@
              picker.iso3 !== null &&
              (leMode !== 'custom' || validLe(leInput.value));
     saveBtn.disabled = !ok;
+    if (saveHint) saveHint.hidden = ok;
   }
 
   function markSegmented(box, attr, value) {
@@ -808,6 +948,7 @@
     }
     updateBgUi();
     updateSaveState();
+    modalCloseBtn.hidden = !settings; // first run must complete the form
     backdrop.hidden = false;
     setTimeout(function () { birthdayField.focus(); }, 50);
   }
@@ -832,9 +973,9 @@
       birthday: birthdayField.value,
       sex: chosenSex,
       country: picker.iso3 || 'WLD',
-      theme: previewTheme || (settings && settings.theme) || 'midnight',
+      theme: previewTheme || (settings && settings.theme) || DEFAULT_THEME,
       hero: previewHero || (settings && settings.hero) || 'days-left',
-      ambient: previewAmbient || (settings && settings.ambient) || 'hourglass',
+      ambient: previewAmbient || (settings && settings.ambient) || DEFAULT_AMBIENT,
       bg: pendingBg !== undefined ? pendingBg : (settings && settings.bg) || null,
       scope: previewScope || (settings && settings.scope) || 'country',
       customLE: leMode === 'custom' ? leInput.value : null,
@@ -956,9 +1097,14 @@
     if (ev.target === backdrop && settings) dismissModal(); // first run must complete the form
   });
 
+  modalCloseBtn.addEventListener('click', function () {
+    if (settings) dismissModal();
+  });
+
   document.addEventListener('keydown', function (ev) {
     if (ev.key === 'Escape') {
-      if (cal.open) closeCal();
+      if (cal.open && cal.view !== 'days') showCalView('days'); // back out one step
+      else if (cal.open) closeCal();
       else if (!scPop.hidden) closeScPop();
       else if (settings) dismissModal();
     }
@@ -969,6 +1115,22 @@
   // ---------- boot: instant paint, then background refresh ----------
 
   function init() {
+    // An open tab follows the OS light/dark switch live, but only while the
+    // theme is set to 'system' — explicit picks and URL overrides win.
+    try {
+      if (typeof matchMedia === 'function') {
+        var schemeMq = matchMedia('(prefers-color-scheme: dark)');
+        var onSchemeChange = function () {
+          if (effectiveTheme() === 'system') applyTheme('system');
+        };
+        if (schemeMq && schemeMq.addEventListener) {
+          schemeMq.addEventListener('change', onSchemeChange);
+        } else if (schemeMq && schemeMq.addListener) {
+          schemeMq.addListener(onSchemeChange); // older browsers
+        }
+      }
+    } catch (e) { /* best-effort, like ambient.js */ }
+
     var qs = new URLSearchParams(location.search);
     var fromUrl = qs.get('birthday') && qs.get('sex')
       ? { birthday: qs.get('birthday'), sex: qs.get('sex'), country: qs.get('country') || 'WLD' }

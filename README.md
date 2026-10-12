@@ -10,13 +10,13 @@ Your personal countdown ticking backward, your life so far ticking up, and the
 live birth/death rate for your country or the whole world.
 
 ![Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-b3262e?logo=googlechrome&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.3.0-1a1a1a)
+![Version](https://img.shields.io/badge/version-1.4.0-1a1a1a)
 ![Vanilla JS](https://img.shields.io/badge/vanilla-HTML%20%C2%B7%20CSS%20%C2%B7%20JS-f7df1e?logo=javascript&logoColor=black)
 ![No build step](https://img.shields.io/badge/build%20step-none-2e7d32)
 ![Data: World Bank](https://img.shields.io/badge/data-World%20Bank%20Open%20Data-0b6fb6)
 ![Privacy: local only](https://img.shields.io/badge/privacy-stays%20on%20device-555)
 
-<img src="docs/screenshots/hero.png" width="860" alt="Memento new tab: 13,510 days left, a live hh:mm:ss.mmm countdown, today's day bar, days lived, and Bangladesh's births and deaths today">
+<img src="docs/screenshots/hero.png" width="860" alt="Memento new tab in the Midnight theme with the Nebula ambient: 13,510 days left, a live hh:mm:ss.mmm countdown, today's day bar, days lived, and Bangladesh's births and deaths today">
 
 </div>
 
@@ -31,12 +31,12 @@ themeable, with your own background image.
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/world-deaths.png" alt="Dusk theme counting deaths today worldwide, with the rising tide ambient"><br><sub><b>Dusk</b> · hero set to <i>deaths today · world</i>, Rising tide ambient</sub></td>
+    <td width="50%"><img src="docs/screenshots/world-deaths.png" alt="Midnight theme counting deaths today worldwide, with the rising tide ambient"><br><sub><b>Midnight</b> · hero set to <i>deaths today · world</i>, Rising tide ambient</sub></td>
     <td width="50%"><img src="docs/screenshots/paper.png" alt="Paper light theme with shortcut chips and the hourglass ambient"><br><sub><b>Paper</b> · shortcut chips, Hourglass ambient</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/ember.png" alt="Ember theme counting deaths today in Bangladesh, with drifting embers"><br><sub><b>Ember</b> · hero set to <i>deaths today · your country</i>, Embers ambient</sub></td>
-    <td width="50%"><img src="docs/screenshots/first-run.png" alt="First-run setup asking for birthday, sex and country"><br><sub><b>First run</b> · three answers, nothing leaves the device</sub></td>
+    <td width="50%"><img src="docs/screenshots/ember.png" alt="Dawn light theme counting deaths today in Bangladesh, with drifting embers"><br><sub><b>Dawn</b> · hero set to <i>deaths today · your country</i>, Embers ambient</sub></td>
+    <td width="50%"><img src="docs/screenshots/first-run.png" alt="First-run setup asking for birthday, sex and country on the light default theme"><br><sub><b>First run</b> · three answers on the light default, nothing leaves the device</sub></td>
   </tr>
 </table>
 
@@ -66,11 +66,13 @@ themeable, with your own background image.
   under the wordmark to add a shortcut (favicon shown automatically, letter tile
   as fallback), hover a chip to edit or remove it. Stored locally, capped at 12,
   no new permissions.
-- **Ambient backgrounds:** a quiet animated layer behind everything — an
-  hourglass of red sand that piles up as the day drains (and flips at midnight),
-  a dark tide that rises through the day, drifting embers and ash, or a
-  heartbeat trace that occasionally flatlines. Blood-red with a soft glow on the
-  dark themes, plain ink on Paper; tuned to stay in the background. Pauses
+- **Ambient backgrounds:** a quiet animated layer behind everything — luminous
+  clouds drifting across the whole screen (**Nebula**, the default), a
+  starfield that leans with your cursor (**Stars**), an hourglass of red sand
+  that piles up as the day drains (and flips at midnight), a dark tide that
+  rises through the day, drifting embers and ash, or a heartbeat trace that
+  occasionally flatlines. Palette follows the theme — soft glow on the dark
+  theme, plain ink on light; tuned to stay in the background. Pauses
   automatically while a background image is set and goes still under
   `prefers-reduced-motion`.
 
@@ -80,9 +82,11 @@ themeable, with your own background image.
   average is for the picked sex + country, e.g. "avg 74.2y · man in
   Bangladesh") or **your own estimate** (20–120 years). The hero always labels
   which one it's using.
-- **Themes:** Midnight (near-black), Dusk (deep blue), Ember (warm brown), and
-  Paper (light ivory) — previewed instantly, reverted if you dismiss without
-  saving.
+- **Themes:** Snow (clean white light, the default), Paper (warm ivory),
+  Dawn (soft peach), Linen (cool gray-blue), and Midnight (near-black dark) —
+  light-first, previewed instantly, reverted if you dismiss without saving —
+  plus a **System** option that follows your device's light/dark mode
+  and switches live, even while a tab is open.
 - **Big number:** choose what the hero counts — your **days left**, **deaths
   today in your country**, or **deaths today worldwide**. The other numbers
   move to the row below, so nothing is lost.
@@ -91,17 +95,22 @@ themeable, with your own background image.
   Bangladesh ⇄"), no modal needed.
 - **Day bar:** Show or Hide the "today draining" urgency bar under the
   countdown (on by default).
-- **Ambient:** the animated background mood — **None**, **Hourglass** (the
-  day draining as falling sand, the default), **Rising** (a dark tide rising
-  through the day), **Embers**, or **Pulse** (a heartbeat trace that sometimes
-  flatlines). Previewed live in the modal, reverted if you dismiss without
-  saving. The Hourglass pile and the Rising tide track the real fraction of the
-  day elapsed, so reloading mid-afternoon shows an afternoon-sized pile.
+- **Ambient:** the animated background mood — **Nebula** (luminous clouds
+  drifting across the whole screen, the default), **Hourglass** (the day
+  draining as falling sand), **Stars** (a drifting starfield that leans with
+  your cursor), **Rising** (a dark tide rising through the day), **Embers**,
+  **Pulse** (a heartbeat trace that sometimes flatlines), or **None**.
+  Previewed live in the modal, reverted if you dismiss without saving. The
+  Hourglass pile and the Rising tide track the real fraction of the day
+  elapsed, so reloading mid-afternoon shows an afternoon-sized pile.
 - **Background image:** upload any picture from your device. It's downscaled
   locally (max 1920px, JPEG) before being stored — nothing is uploaded to any
   server — and shown behind a readability scrim. Removable anytime.
-- **Birthday calendar:** a proper month-grid calendar picker (year and month
-  navigation, future dates disabled) instead of the browser's native date field.
+- **Birthday calendar:** a proper month-grid calendar picker instead of the
+  browser's native date field. The month and the year in the header are each a
+  button: click the year to jump straight to any birth year from a scrollable
+  list (1900 → today), click the month for a twelve-month list — no paging
+  back one year at a time. Future dates are disabled.
 
 First run asks for **birthday, sex, and country** (searchable, 217 countries +
 World). A ghosted ⚙ gear (bottom-right) reopens the setup anytime. Everything
@@ -146,7 +155,7 @@ baseline (`js/baseline.js`) takes over and the badge says "offline baseline".
 MEMENTO/
 ├── manifest.json        # MV3, chrome_url_overrides.newtab, storage + worldbank host
 ├── newtab.html
-├── css/newtab.css       # near-black, vignette + film grain, red accent
+├── css/newtab.css       # themeable (4 light + 1 dark), vignette + film grain, red accent
 ├── js/stats.js          # pure math: countdowns, rates (unit-testable)
 ├── js/api.js            # World Bank client, 7-day cache, baseline fallback
 ├── js/baseline.js       # generated offline fallback (world figures + country list)
@@ -174,10 +183,11 @@ via a localStorage shim, and URL params stand in for saved settings):
 
 ```sh
 google-chrome --headless=new --disable-gpu --screenshot=/tmp/shot.png \
-  "file://$PWD/newtab.html?birthday=1990-06-15&sex=male&country=BGD&theme=dusk&hero=deaths-world"
+  "file://$PWD/newtab.html?birthday=1990-06-15&sex=male&country=BGD&theme=midnight&ambient=nebula&hero=deaths-world"
 ```
 
-URL params: `birthday`, `sex`, `country`, `theme` (midnight|dusk|ember|paper),
+URL params: `birthday`, `sex`, `country`, `theme` (snow|paper|dawn|linen|midnight|system),
+`ambient` (nebula|hourglass|stars|tide|embers|pulse|none),
 `hero` (days-left|deaths-country|deaths-world), `le` (custom life expectancy in
 years, e.g. `80`), `scope` (country|world — which region the bottom row counts),
 `daybar` (0|1 — hide/show the urgency bar), `shortcuts` (demo chips, e.g.

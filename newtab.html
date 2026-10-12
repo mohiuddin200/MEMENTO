@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" id="theme-color-meta" content="#fbfbfc">
   <title>New Tab — Memento</title>
   <link rel="stylesheet" href="css/newtab.css">
 </head>
-<body data-theme="midnight">
+<body data-theme="snow">
   <div class="bgimg" id="bgimg" aria-hidden="true"></div>
   <canvas id="ambient" aria-hidden="true"></canvas>
   <div class="grain" aria-hidden="true"></div>
@@ -88,34 +89,45 @@
 
   <div class="backdrop" id="modal-backdrop" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button type="button" class="modal-close" id="modal-close" title="Close" aria-label="Close settings" hidden>&#10005;</button>
       <h1 id="modal-title">Three answers.<br>Then every tab reminds you.</h1>
       <p class="modal-sub">Nothing leaves this device. Change it anytime with the gear.</p>
 
-      <label class="field-label" for="f-birthday">Birthday</label>
-      <div class="cal-wrap">
+      <h2 class="section-title">About you <span class="hint">— 3 answers to calculate your countdown</span></h2>
+      <label class="field-label" for="f-birthday"><span class="step-num">1</span> Birthday <span class="req-badge">Required</span></label>
+      <div class="cal-wrap" id="cal-wrap">
         <button type="button" class="field cal-field placeholder" id="f-birthday">Select your birthday</button>
         <div class="cal" id="cal" hidden>
-          <div class="cal-head">
+          <div class="cal-head" id="cal-head">
             <button type="button" class="cal-nav wide" id="cal-prevy" title="Previous year">&#171;</button>
             <button type="button" class="cal-nav" id="cal-prev" title="Previous month">&#8249;</button>
-            <span class="cal-title" id="cal-title"></span>
+            <span class="cal-title" id="cal-title">
+              <button type="button" class="cal-title-btn" id="cal-title-m" title="Pick the month from a list"></button>
+              <button type="button" class="cal-title-btn" id="cal-title-y" title="Pick the year from a list"></button>
+            </span>
             <button type="button" class="cal-nav" id="cal-next" title="Next month">&#8250;</button>
             <button type="button" class="cal-nav wide" id="cal-nexty" title="Next year">&#187;</button>
           </div>
-          <div class="cal-grid cal-week">
+          <div class="cal-head" id="cal-pick-head" hidden>
+            <button type="button" class="cal-nav" id="cal-pick-back" title="Back to the month grid">&#8249;</button>
+            <span class="cal-title" id="cal-pick-title"></span>
+          </div>
+          <div class="cal-grid cal-week" id="cal-week">
             <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
           </div>
           <div class="cal-grid" id="cal-days"></div>
+          <div class="cal-picker cal-months" id="cal-months" hidden></div>
+          <div class="cal-picker cal-years" id="cal-years" hidden></div>
         </div>
       </div>
 
-      <span class="field-label">Sex <span class="hint">— sets your life expectancy</span></span>
+      <span class="field-label"><span class="step-num">2</span> Sex <span class="req-badge">Required</span> <span class="hint">— sets your life expectancy</span></span>
       <div class="segmented" id="f-sex">
         <button type="button" data-sex="male">Male</button>
         <button type="button" data-sex="female">Female</button>
       </div>
 
-      <label class="field-label" for="f-country">Country</label>
+      <label class="field-label" for="f-country"><span class="step-num">3</span> Country <span class="req-badge">Required</span></label>
       <input type="text" id="f-country" class="field" placeholder="Search countries…" autocomplete="off" spellcheck="false">
       <ul class="country-list" id="country-list" role="listbox" aria-label="Country"></ul>
 
@@ -127,23 +139,27 @@
       <input type="number" id="f-le-years" class="field le-input" min="20" max="120" step="0.5"
              inputmode="decimal" placeholder="e.g. 80" hidden>
 
-      <span class="field-label">Customize</span>
+      <h2 class="section-title">Make it yours <span class="hint">— optional, change anytime</span></h2>
 
       <span class="field-label" style="margin-top:10px">Theme</span>
       <div class="swatches" id="f-theme">
-        <button type="button" data-theme-swatch="midnight" title="Midnight"><span class="swatch-name">Midnight</span></button>
-        <button type="button" data-theme-swatch="dusk" title="Dusk"><span class="swatch-name">Dusk</span></button>
-        <button type="button" data-theme-swatch="ember" title="Ember"><span class="swatch-name">Ember</span></button>
-        <button type="button" data-theme-swatch="paper" title="Paper"><span class="swatch-name">Paper</span></button>
+        <button type="button" data-theme-swatch="snow" title="Snow — clean light"><span class="swatch-name">Snow</span></button>
+        <button type="button" data-theme-swatch="paper" title="Paper — warm ivory light"><span class="swatch-name">Paper</span></button>
+        <button type="button" data-theme-swatch="dawn" title="Dawn — soft peach light"><span class="swatch-name">Dawn</span></button>
+        <button type="button" data-theme-swatch="linen" title="Linen — cool gray-blue light"><span class="swatch-name">Linen</span></button>
+        <button type="button" data-theme-swatch="midnight" title="Midnight — near-black dark"><span class="swatch-name">Midnight</span></button>
+        <button type="button" data-theme-swatch="system" title="System — follows your device's light or dark mode"><span class="swatch-name">System</span></button>
       </div>
 
       <span class="field-label">Ambient <span class="hint">— the background mood</span></span>
       <div class="segmented wrap" id="f-ambient">
-        <button type="button" data-ambient="none" title="Still — no animation">None</button>
+        <button type="button" data-ambient="nebula" title="Nebula — luminous clouds drifting across the whole screen">Nebula</button>
         <button type="button" data-ambient="hourglass" title="Hourglass — the day drains away as falling red sand">Hourglass</button>
+        <button type="button" data-ambient="stars" title="Stars — a drifting starfield that leans with your cursor">Stars</button>
         <button type="button" data-ambient="tide" title="The Rising — a dark tide rises through the day">Rising</button>
         <button type="button" data-ambient="embers" title="Embers — a slow drift of glowing embers and falling ash">Embers</button>
         <button type="button" data-ambient="pulse" title="Last pulse — a heartbeat trace that occasionally flatlines">Pulse</button>
+        <button type="button" data-ambient="none" title="Still — no animation">None</button>
       </div>
 
       <span class="field-label">Big number <span class="hint">— what the hero counts</span></span>
@@ -153,16 +169,21 @@
         <button type="button" data-hero="deaths-world">World deaths</button>
       </div>
 
-      <span class="field-label">Bottom numbers <span class="hint">— country or world</span></span>
-      <div class="segmented" id="f-scope">
-        <button type="button" data-scope="country">My country</button>
-        <button type="button" data-scope="world">World</button>
-      </div>
-
-      <span class="field-label">Day bar <span class="hint">— today draining, live</span></span>
-      <div class="segmented" id="f-daybar">
-        <button type="button" data-daybar="on">Show</button>
-        <button type="button" data-daybar="off">Hide</button>
+      <div class="field-row-2">
+        <div class="field-col">
+          <span class="field-label">Bottom numbers <span class="hint">— scope</span></span>
+          <div class="segmented" id="f-scope">
+            <button type="button" data-scope="country">My country</button>
+            <button type="button" data-scope="world">World</button>
+          </div>
+        </div>
+        <div class="field-col">
+          <span class="field-label">Day bar <span class="hint">— live bar</span></span>
+          <div class="segmented" id="f-daybar">
+            <button type="button" data-daybar="on">Show</button>
+            <button type="button" data-daybar="off">Hide</button>
+          </div>
+        </div>
       </div>
 
       <span class="field-label">Background image</span>
@@ -173,6 +194,7 @@
       <input type="file" id="f-bg-file" accept="image/*" hidden>
 
       <button class="save" id="save" disabled>Start counting</button>
+      <p class="save-hint" id="save-hint">Complete the 3 required answers above to begin.</p>
       <p class="fineprint">World Bank life tables · approximate — a warning sign, not a diagnosis.</p>
     </div>
   </div>
