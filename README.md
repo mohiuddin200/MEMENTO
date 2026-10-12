@@ -16,7 +16,7 @@ live birth/death rate for your country or the whole world.
 ![Data: World Bank](https://img.shields.io/badge/data-World%20Bank%20Open%20Data-0b6fb6)
 ![Privacy: local only](https://img.shields.io/badge/privacy-stays%20on%20device-555)
 
-<img src="docs/screenshots/hero.png" width="860" alt="Memento new tab in the Midnight theme with the Nebula ambient: 13,510 days left, a live hh:mm:ss.mmm countdown, today's day bar, days lived, and Bangladesh's births and deaths today">
+<img src="docs/screenshots/hero.png" width="860" alt="Memento new tab in the Midnight theme with the Nebula ambient: 14,665 days left, a live hh:mm:ss.mmm countdown, the age-adjusted average behind it, today's day bar, days lived, and Bangladesh's births and deaths today">
 
 </div>
 
@@ -42,7 +42,7 @@ themeable, with your own background image.
 
 ## What you get
 
-- **Hero countdown (ticks backward):** `13,510 days left` — computed from your
+- **Hero countdown (ticks backward):** `14,665 days left` — computed from your
   birthday plus your life expectancy (see below) — with a live `hh:mm:ss.mmm`
   sub-counter (the milliseconds drain at display refresh) and a daily one-liner
   ("≈ 37 summers left. Start now.").
@@ -55,7 +55,7 @@ themeable, with your own background image.
   at-birth figure) and says so right under the countdown ("average for a man
   your age in Bangladesh: 76.5 years"); or set your own estimate ("I'll live to
   80") and the countdown switches to it.
-- **Your life so far (ticks up):** `13,263 days lived · 1,145,971,852 seconds`,
+- **Your life so far (ticks up):** `13,268 days lived · 1,146,418,943 seconds`,
   with a thin progress bar for the share of your expected life already spent.
 - **Real-time death-rate row:** deaths/second, births today, deaths today, and
   net population change today — for **your country or the whole world** (your
@@ -200,15 +200,19 @@ google-chrome --headless=new --disable-gpu --screenshot=/tmp/shot.png \
 
 ### Regenerating screenshots
 
-The store screenshots (`store/listing/`) and the landing page's settings image
-are rendered from the real UI, so they never drift from it:
+Every product image — the README gallery (`docs/screenshots/`), the landing
+page's images (`site/assets/`) and the store screenshots (`store/listing/`) — is
+rendered from the real UI, so none can drift from it:
 
 ```sh
-node tools/store-shots.js   # needs google-chrome (or CHROME=/path/to/chrome), Node 22+
+node tools/screenshots.js         # all of them; needs google-chrome (or CHROME=…), Node 22+
+node tools/screenshots.js store   # only paths containing "store"
 ```
 
-Layouts live in `tools/store/listing.html`; `tools/shot.js` is the
-dependency-free headless-Chrome screenshotter behind it.
+README images use the render machine's fonts; landing-page and store images get
+the site's typefaces (Gelasio, Inter) and sample favicons via
+`tools/store/decorate.js`. Store layouts live in `tools/store/listing.html`;
+`tools/shot.js` is the dependency-free headless-Chrome screenshotter behind it.
 
 URL params: `birthday`, `sex`, `country`, `theme` (snow|paper|dawn|linen|midnight|system),
 `ambient` (nebula|hourglass|stars|tide|embers|pulse|none),

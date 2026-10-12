@@ -4,8 +4,8 @@
   ?n=1..5 picks the layout. Shots 1, 2 and 4 frame the real newtab.html in
   an iframe; 3 and 5 show crops of the real settings modal
   (site/assets/customize.webp, tools/store/setup.webp). Shortcut favicons
-  come from tools/store/icons/ because headless Chrome has no favicon cache.
-  Regenerate with: node tools/store-shots.js
+  and the site's fonts are injected by tools/store/decorate.js.
+  Regenerate with: node tools/screenshots.js
 -->
 <html lang="en">
 <head>
@@ -57,6 +57,7 @@
 </style>
 </head>
 <body>
+<script src="decorate.js"></script>
 <script>
   var n = Number(new URLSearchParams(location.search).get('n')) || 1;
   var NEWTAB = '../../newtab.html';
@@ -119,22 +120,19 @@
          ['Open data, works offline', 'UN life tables built in; World Bank rates cached for a week'],
          ['Approximate by design', 'A warning sign, not a diagnosis'],
        ]) + '</div>' +
-       '<div class="card shadow" style="left:690px;top:76px;width:460px;height:647px;background-image:url(setup.webp)"></div>',
+       '<div class="card shadow" style="left:690px;top:50%;transform:translateY(-50%);width:460px;overflow:hidden">' +
+       '<img src="setup.webp" alt="" style="display:block;width:100%"></div>',
   }[n];
   document.write(html);
 
-  // Inside the framed new tab: real favicons (headless Chrome has no favicon
-  // cache) and, for shot 4, the add-shortcut popover mid-entry.
+  // Inside the framed new tab: favicons and the site's fonts (decorate.js)
+  // and, for shot 4, the add-shortcut popover mid-entry.
   var frame = document.getElementById('tab');
   window.ready = !frame;
   if (frame) frame.addEventListener('load', function () {
     var w = frame.contentWindow, d = frame.contentDocument;
-    setTimeout(function () {
-      d.querySelectorAll('.sc-chip').forEach(function (chip) {
-        var name = chip.querySelector('.sc-name').textContent.toLowerCase();
-        var ico = chip.querySelector('.sc-ico');
-        ico.src = new URL('icons/' + name + '.png', location.href).href;
-      });
+    setTimeout(async function () {
+      await window.MementoDecorate(d, { fonts: true });
       if (n === 4) {
         d.querySelector('.sc-add').click();
         d.getElementById('sc-name').value = 'Hacker News';
