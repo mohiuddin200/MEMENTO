@@ -144,6 +144,7 @@ function makeEnv(byId, storageBacking, search, schemeMq) {
     setItem(k, v) { this._back[k] = String(v); },
   };
   let intervalCb = null;
+  let rafCb = null;
   const ambientCalls = []; // app.js → MementoAmbient.set() recorder
   const sandboxGlobals = {
     document,
@@ -151,6 +152,7 @@ function makeEnv(byId, storageBacking, search, schemeMq) {
     location: { search: search || '' },
     navigator: { language: 'en-US' },
     setInterval: (fn) => { intervalCb = fn; return 1; },
+    requestAnimationFrame: (fn) => { rafCb = fn; return 1; },
     setTimeout: (fn) => { fn(); return 1; },
     URLSearchParams,
     URL, // app.js parses shortcut URLs with new URL()
@@ -165,7 +167,8 @@ function makeEnv(byId, storageBacking, search, schemeMq) {
   sandboxGlobals.window.MementoAmbient = {
     set: (m, opts) => ambientCalls.push({ mode: m, paused: !!(opts && opts.paused) }),
   };
-  return { document, localStorage, interval: () => intervalCb(), ambientCalls, sandboxGlobals };
+  return { document, localStorage, interval: () => intervalCb(), frame: () => rafCb && rafCb(),
+    ambientCalls, sandboxGlobals };
 }
 
 function loadApp(sandboxGlobals) {
@@ -368,6 +371,20 @@ function findAll(root, cls, out = []) {
     const expected = S.countdown('1990-06-15', le, Date.now()).days;
     const shown = parseInt(byId['days-left'].textContent.replace(/,/g, ''), 10);
     assert.ok(Math.abs(shown - expected) <= 1, `days left ${shown} vs ${expected}`);
+  });
+
+  await test('animation frame: redraws only the countdown and day bar', () => {
+    env.interval();
+    byId.hms.textContent = 'stale';
+    byId['daybar-fill'].style.width = '0%';
+    byId['births-today'].textContent = 'untouched';
+    byId['le-note'].textContent = 'untouched';
+    env.frame();
+    assert.ok(/^\d\d:\d\d:\d\d\.\d{3}$/.test(byId.hms.textContent), 'hms redrawn: ' + byId.hms.textContent);
+    assert.notStrictEqual(byId['daybar-fill'].style.width, '0%', 'day bar fill redrawn');
+    assert.strictEqual(byId['births-today'].textContent, 'untouched', 'rates row left to the 1 Hz update');
+    assert.strictEqual(byId['le-note'].textContent, 'untouched', 'labels left to the 1 Hz update');
+    env.interval(); // restore
   });
 
   await test('day bar: on by default, label matches the local day fraction', () => {

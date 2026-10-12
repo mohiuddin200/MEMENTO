@@ -350,8 +350,35 @@
     daysEl.classList.toggle('longnum', text.length > 6);
   }
 
+  // What the display-rate loop redraws between 1 Hz updates: the countdown's
+  // millisecond fraction and the day bar's fill. update() refreshes it; null
+  // means nothing on screen moves faster than once a second.
+  var frame = null;
+
+  function renderCountdown(cd) {
+    setHeroNumber(fmt(cd.days));
+    setText(hmsEl, pad2(cd.hours) + ':' + pad2(cd.minutes) + ':' + pad2(cd.seconds) +
+      '.' + pad3(cd.milliseconds));
+  }
+
+  function renderDaybarFill(now) {
+    daybarFillEl.style.width = (S.dayFraction(now) * 100).toFixed(3) + '%';
+  }
+
+  // Cheap per-frame redraw — no lookups, no allocation beyond the countdown.
+  function tick() {
+    if (!frame) return;
+    var now = Date.now();
+    if (frame.daybar) renderDaybarFill(now);
+    if (frame.expectancy != null) {
+      var cd = S.countdown(frame.birthday, frame.expectancy, now);
+      if (!cd.exceeded) renderCountdown(cd);
+    }
+  }
+
   function update() {
     var now = Date.now();
+    frame = null;
     if (!dataset) return;
 
     var iso = settings ? settings.country : 'WLD';
@@ -409,10 +436,10 @@
     var showDaybar = effectiveDaybar();
     daybarEl.hidden = !showDaybar;
     if (showDaybar) {
-      var dayFrac = S.dayFraction(now);
-      daybarFillEl.style.width = (dayFrac * 100).toFixed(3) + '%';
-      setText(daybarLabelEl, 'today \u00b7 ' + (dayFrac * 100).toFixed(1) + '% spent');
+      renderDaybarFill(now);
+      setText(daybarLabelEl, 'today \u00b7 ' + (S.dayFraction(now) * 100).toFixed(1) + '% spent');
     }
+    frame = { daybar: showDaybar, birthday: settings.birthday, expectancy: null };
 
     // Secondary line under the hero.
     if (effectiveHero() === 'days-left') {
@@ -439,9 +466,8 @@
       } else {
         setText(daysLabel, 'days left');
         hmsEl.classList.remove('bonus');
-        setHeroNumber(fmt(cd.days));
-        setText(hmsEl, pad2(cd.hours) + ':' + pad2(cd.minutes) + ':' + pad2(cd.seconds) +
-          '.' + pad3(cd.milliseconds));
+        renderCountdown(cd);
+        frame.expectancy = expectancy;
       }
     } else {
       var scope = heroMode === 'deaths-world' ? 'WLD' : (settings.country || 'WLD');
@@ -1232,11 +1258,12 @@
         });
       });
 
-    // 1 Hz heartbeat (also the test hook), plus a display-rate loop in real
-    // browsers so the millisecond fraction of the countdown drains smoothly.
+    // 1 Hz heartbeat for everything (also the test hook), plus a display-rate
+    // loop in real browsers that only redraws what moves faster: the
+    // countdown's milliseconds and the day bar's fill.
     setInterval(update, 1000);
     if (typeof requestAnimationFrame === 'function') {
-      var rafLoop = function () { update(); requestAnimationFrame(rafLoop); };
+      var rafLoop = function () { tick(); requestAnimationFrame(rafLoop); };
       requestAnimationFrame(rafLoop);
     }
   }
