@@ -211,4 +211,27 @@ test('percentLived clamps to [0,100]', () => {
   assert.strictEqual(S.percentLived(-5, 76), 0);
 });
 
+test('remainingYears: exact at grid ages, linear between, flat past the last age', () => {
+  const ages = [0, 1, 5, 10];
+  const ex = [70, 71, 68, 63];
+  assert.strictEqual(S.remainingYears(ages, ex, 0), 70);
+  assert.strictEqual(S.remainingYears(ages, ex, 5), 68);
+  assert.strictEqual(S.remainingYears(ages, ex, 7.5), 65.5);
+  assert.strictEqual(S.remainingYears(ages, ex, 40), 63);
+  assert.strictEqual(S.remainingYears(ages, ex, -1), 70, 'negative age clamps to birth');
+  assert.strictEqual(S.remainingYears(null, ex, 5), null);
+});
+
+test('remainingYears: an adult outlives the at-birth average (real UN table)', () => {
+  global.self = global;
+  require('../js/lifetables.js');
+  const LT = global.MementoLifeTables;
+  const [male] = LT.tables.BGD;
+  const atBirth = male[0];
+  const at36 = 36 + S.remainingYears(LT.ages, male, 36);
+  const at90 = 90 + S.remainingYears(LT.ages, male, 90);
+  assert.ok(at36 > atBirth, `36-year-old: ${at36} > at-birth ${atBirth}`);
+  assert.ok(at90 > 90, 'a 90-year-old still has expected years left');
+});
+
 console.log(passed + ' passed, ' + (process.exitCode ? 'FAILURES' : '0 failed'));

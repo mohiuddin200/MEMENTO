@@ -174,6 +174,9 @@ function loadApp(sandboxGlobals) {
   globalThis.MementoBaseline = require('../js/baseline.js').MementoBaseline;
   sandboxGlobals.window.MementoStats = require('../js/stats.js');
   sandboxGlobals.window.MementoApi = require('../js/api.js');
+  globalThis.self = globalThis;
+  require('../js/lifetables.js');
+  sandboxGlobals.window.MementoLifeTables = globalThis.MementoLifeTables;
   vm.runInNewContext(src, sandboxGlobals, { filename: 'app.js' });
 }
 
@@ -343,10 +346,28 @@ function findAll(root, cls, out = []) {
     assert.strictEqual(env.document.body.dataset.theme, 'snow', 'preview reverted to saved');
   });
 
-  await test('auto expectancy: hero states the average behind the countdown', () => {
-    // BGD has no per-country numbers in the offline baseline → world average is used.
-    assert.ok(/average for a man worldwide: 71\.1 years/.test(byId['le-note'].textContent),
-      'le-note: ' + byId['le-note'].textContent);
+  // Remaining-years expectancy for the 1990-06-15 man in Bangladesh, as of
+  // today's midnight — the same figure the app derives from the UN table.
+  const bgdManYourAge = () => {
+    const S = require('../js/stats.js');
+    const LT = globalThis.MementoLifeTables;
+    const midnight = new Date(); midnight.setHours(0, 0, 0, 0);
+    const age = (midnight.getTime() - S.toMs('1990-06-15')) / S.MS_PER_YEAR;
+    return age + S.remainingYears(LT.ages, LT.tables.BGD[0], age);
+  };
+  const oneDp = (n) => String(Math.round(n * 10) / 10);
+
+  await test('auto expectancy: hero states the age-adjusted average behind the countdown', () => {
+    // The UN life table is bundled, so BGD gets its own figure even offline,
+    // and it is the expectancy for someone who has already reached this age.
+    const le = bgdManYourAge();
+    assert.strictEqual(byId['le-note'].textContent,
+      'average for a man your age in Bangladesh: ' + oneDp(le) + ' years');
+    assert.ok(le > globalThis.MementoLifeTables.tables.BGD[0][0], 'above the at-birth figure');
+    const S = require('../js/stats.js');
+    const expected = S.countdown('1990-06-15', le, Date.now()).days;
+    const shown = parseInt(byId['days-left'].textContent.replace(/,/g, ''), 10);
+    assert.ok(Math.abs(shown - expected) <= 1, `days left ${shown} vs ${expected}`);
   });
 
   await test('day bar: on by default, label matches the local day fraction', () => {
@@ -363,8 +384,9 @@ function findAll(root, cls, out = []) {
 
   await test('life expectancy: custom 80-year estimate overrides the average', () => {
     byId.gear.click();
-    assert.ok(/avg 71\.1y \u00b7 man worldwide/.test(byId['le-auto-hint'].textContent),
-      'hint shows the auto average: ' + byId['le-auto-hint'].textContent);
+    assert.strictEqual(byId['le-auto-hint'].textContent,
+      '\u2014 avg ' + oneDp(bgdManYourAge()) + 'y \u00b7 man your age in Bangladesh',
+      'hint shows the auto average');
     byId['f-le'].children[1].click(); // My own estimate
     assert.strictEqual(byId['f-le-years'].hidden, false, 'number input appears');
     byId['f-le-years'].value = '80';

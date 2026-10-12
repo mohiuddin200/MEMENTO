@@ -16,11 +16,11 @@ Chrome users who want a daily nudge to spend their time on purpose. They meet Me
 
 ## Product Purpose
 
-Memento replaces Chrome's new tab page with a memento mori: a personal countdown of the days the user likely has left (birthday + World Bank life expectancy, or their own estimate) and real-time birth/death rate estimates for their country or the world. Success is the user glancing at it and choosing to spend today better.
+Memento replaces Chrome's new tab page with a memento mori: a personal countdown of the days the user likely has left (birthday + UN life-table expectancy for their current age, or their own estimate) and real-time birth/death rate estimates for their country or the world. Success is the user glancing at it and choosing to spend today better.
 
 ## Positioning
 
-A death clock that is honest about its numbers: World Bank life tables and crude rates, approximate by design ("a warning sign, not a diagnosis"), with everything kept on the user's device.
+A death clock that is honest about its numbers: UN life tables (age-adjusted) and World Bank crude rates, approximate by design ("a warning sign, not a diagnosis"), with everything kept on the user's device.
 
 ## Capabilities and Constraints
 
@@ -44,6 +44,6 @@ A death clock that is honest about its numbers: World Bank life tables and crude
 
 ## Product Principles
 
-- Truthful numbers: every figure traces to World Bank data and is labelled approximate.
+- Truthful numbers: every figure traces to UN or World Bank data and is labelled approximate.
 - Private by default: nothing leaves the device except requests for public World Bank data and shortcut favicons.
 - Quiet, not morbid: urgency through restraint, never shock.

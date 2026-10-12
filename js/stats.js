@@ -77,6 +77,24 @@
     return m != null ? m : (f != null ? f : 73);
   }
 
+  // Remaining life expectancy at an exact age, linearly interpolated over a
+  // life table's ex column (ages = age-group starts, ascending). Life
+  // expectancy at birth counts every childhood death, so an adult's own
+  // expected lifespan — age + this — is higher than the at-birth figure.
+  function remainingYears(ages, ex, ageYears) {
+    if (!ages || !ex || !ages.length) return null;
+    var a = Math.max(0, ageYears);
+    var last = ages.length - 1;
+    if (a >= ages[last]) return ex[last];
+    for (var i = 0; i < last; i++) {
+      if (a < ages[i + 1]) {
+        var t = (a - ages[i]) / (ages[i + 1] - ages[i]);
+        return ex[i] + (ex[i + 1] - ex[i]) * t;
+      }
+    }
+    return ex[last];
+  }
+
   // Crude rate per 1,000 people per year → events per second
   // (Worldometer-style extrapolation from annual figures).
   function perSecond(ratePer1000, population) {
@@ -127,6 +145,7 @@
     countdown: countdown,
     lifeSoFar: lifeSoFar,
     expectancyYears: expectancyYears,
+    remainingYears: remainingYears,
     perSecond: perSecond,
     secondsSinceMidnight: secondsSinceMidnight,
     dayFraction: dayFraction,

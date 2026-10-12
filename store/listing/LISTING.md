@@ -35,7 +35,7 @@ MAKE IT YOURS
 • Four themes: Paper (light), Midnight, Dusk and Ember
 • Ambient backgrounds: falling hourglass sand, a rising tide, drifting embers, a heartbeat that sometimes flatlines, or none at all
 • Choose the big number: your days left, deaths today in your country, or deaths today worldwide
-• Life expectancy your way: the World Bank average for your sex and country, or your own estimate
+• Life expectancy your way: the average for someone of your age, sex and country, or your own estimate
 • Your own background photo, resized and stored on your device
 • Every option previews live; dismiss and it reverts
 
@@ -49,7 +49,7 @@ PRIVATE BY DESIGN
 • Animations go still if your system asks to reduce motion
 
 ABOUT THE NUMBERS
-Life expectancy, crude birth and death rates, and population come from the World Bank. The live counters are extrapolated from those yearly rates, the same method Worldometer-style counters use, and reset at your local midnight. Memento is approximate by design: a warning sign, not a diagnosis.
+Life expectancy comes from the UN World Population Prospects life tables and is adjusted for your current age (an adult's expectancy is higher than the at-birth figure). Crude birth and death rates and population come from the World Bank. The live counters are extrapolated from those yearly rates, the same method Worldometer-style counters use, and reset at your local midnight. Memento is approximate by design: a warning sign, not a diagnosis.
 
 Website and privacy policy: https://memento-deathclock.vercel.app
 ```

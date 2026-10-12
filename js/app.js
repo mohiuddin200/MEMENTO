@@ -252,6 +252,56 @@
     }
   }
 
+  // ---------- life expectancy ----------
+
+  // Expected lifespan (years) for this birthday, sex and country: age at the
+  // start of today plus the UN life table's remaining years at that age.
+  // Held fixed through the day so the countdown ticks in real time; it edges
+  // forward at midnight as another survived day raises the expectancy.
+  // No table for the country → the World table scaled to the country's World
+  // Bank at-birth figure; no tables at all → that at-birth figure itself.
+  // birthday may be null (modal hint before one is picked) → at-birth value.
+  var leMemo = { key: null, value: null };
+
+  function autoExpectancy(birthday, sex, iso, r) {
+    var todayKey = isoOf(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+    var e = r && r.entry;
+    var wbLE = e ? S.expectancyYears({ male: e.leMale, female: e.leFemale }, sex) : null;
+    var key = [birthday, sex, iso, todayKey, wbLE, r && r.fallback].join('|');
+    if (leMemo.key === key) return leMemo.value;
+
+    var age = 0;
+    if (birthday) {
+      var midnight = new Date();
+      midnight.setHours(0, 0, 0, 0);
+      age = Math.max(0, (midnight.getTime() - S.toMs(birthday)) / S.MS_PER_YEAR);
+    }
+    var LT = window.MementoLifeTables;
+    var col = sex === 'female' ? 1 : 0;
+    var own = LT && iso !== 'WLD' && LT.tables[iso];
+    var world = LT && LT.tables.WLD;
+    var local = iso !== 'WLD' && !(r && r.fallback);
+    var years;
+    if (own) {
+      years = age + S.remainingYears(LT.ages, own[col], age);
+      local = true;
+    } else if (world) {
+      var scale = local && wbLE != null ? wbLE / world[col][0] : 1;
+      years = age + S.remainingYears(LT.ages, world[col], age) * scale;
+    } else {
+      years = wbLE != null ? wbLE : S.expectancyYears(null, sex);
+    }
+    var value = { years: years, local: local, atAge: !!birthday && !!LT };
+    leMemo = { key: key, value: value };
+    return value;
+  }
+
+  // "a man your age in Bangladesh" / "a woman worldwide" — what the average describes.
+  function leWho(sex, ax, name) {
+    var who = (sex === 'female' ? 'woman' : 'man') + (ax.atAge ? ' your age' : '');
+    return who + ' ' + (ax.local ? 'in ' + name : 'worldwide');
+  }
+
   // ---------- one-liners (one per day, deterministic) ----------
 
   var ONE_LINERS = [
@@ -331,6 +381,7 @@
       ? (e.name || iso) +
         (r.fallback && iso !== 'WLD' ? ' \u00b7 world avg' : '') +
         ' \u00b7 World Bank ' + (e.year || '') +
+        (window.MementoLifeTables ? ' \u00b7 UN WPP ' + window.MementoLifeTables.year : '') +
         ' \u00b7 ' + sourceLabel(dataset)
       : 'no data');
 
@@ -339,8 +390,8 @@
 
     // Personal clock (always computed — feeds the one-liner and the secondary line).
     var lived = S.lifeSoFar(settings.birthday, now);
-    var autoLE = S.expectancyYears(
-      e ? { male: e.leMale, female: e.leFemale } : null, settings.sex);
+    var ax = autoExpectancy(settings.birthday, settings.sex, iso, r);
+    var autoLE = ax.years;
     var customLE = urlOverrides.le != null ? urlOverrides.le : settings.customLE;
     var expectancy = customLE != null ? customLE : autoLE;
     var cd = S.countdown(settings.birthday, expectancy, now);
@@ -349,12 +400,9 @@
     // Say plainly what the countdown is based on.
     if (customLE != null) {
       setText(leNoteEl, 'your estimate \u00b7 ' + leNum(customLE) + ' years');
-    } else if (e) {
-      var who = settings.sex === 'female' ? 'woman' : 'man';
-      var place = (r.fallback || iso === 'WLD') ? 'worldwide' : 'in ' + (e.name || iso);
-      setText(leNoteEl, 'average for a ' + who + ' ' + place + ': ' + leNum(autoLE) + ' years');
     } else {
-      setText(leNoteEl, '');
+      setText(leNoteEl, 'average for a ' + leWho(settings.sex, ax, (e && e.name) || iso) +
+        ': ' + leNum(autoLE) + ' years');
     }
 
     // Urgency bar: the local day draining from midnight to midnight.
@@ -539,6 +587,7 @@
       renderBirthdayField();
       closeCal();
       updateSaveState();
+      updateLeHint(); // the average depends on age
     };
   }
 
@@ -665,10 +714,10 @@
     var rr = Api.resolve(dataset, iso);
     var ee = rr.entry;
     if (!ee) { setText(leHintEl, ''); return; }
-    var le = S.expectancyYears({ male: ee.leMale, female: ee.leFemale }, sex);
-    var who = sex === 'female' ? 'woman' : 'man';
-    var place = (rr.fallback || iso === 'WLD') ? 'worldwide' : 'in ' + (ee.name || iso);
-    setText(leHintEl, '\u2014 avg ' + leNum(le) + 'y \u00b7 ' + who + ' ' + place);
+    var bday = /^\d{4}-\d{2}-\d{2}$/.test(birthdayField.value) ? birthdayField.value : null;
+    var ax = autoExpectancy(bday, sex, iso, rr);
+    setText(leHintEl, '\u2014 avg ' + leNum(ax.years) + 'y' + (ax.atAge ? '' : ' at birth') +
+      ' \u00b7 ' + leWho(sex, ax, ee.name || iso));
   }
 
   // ---------- background image ----------
