@@ -10,7 +10,7 @@ Your personal countdown ticking backward, your life so far ticking up, and the
 live birth/death rate for your country or the whole world.
 
 ![Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-b3262e?logo=googlechrome&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.4.0-1a1a1a)
+![Version](https://img.shields.io/badge/version-1.5.0-1a1a1a)
 ![Vanilla JS](https://img.shields.io/badge/vanilla-HTML%20%C2%B7%20CSS%20%C2%B7%20JS-f7df1e?logo=javascript&logoColor=black)
 ![No build step](https://img.shields.io/badge/build%20step-none-2e7d32)
 ![Data: World Bank](https://img.shields.io/badge/data-World%20Bank%20Open%20Data-0b6fb6)

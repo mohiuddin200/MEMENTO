@@ -1,4 +1,4 @@
-# Chrome Web Store listing — Memento 1.3.0
+# Chrome Web Store listing — Memento 1.5.0
 
 Copy-paste values for the developer dashboard, tab by tab. The images are in
 this folder (regenerate them with `node tools/store-shots.js`).
